@@ -4,6 +4,6 @@ namespace Journal.ViewModels.Controller.Assignments
 {
     public class DeleteViewModel
     {
-        public AssignmentViewModel Assignment { get; set; }
+        public AssignmentSubmissionsViewModel Assignment { get; set; }
     }
 }

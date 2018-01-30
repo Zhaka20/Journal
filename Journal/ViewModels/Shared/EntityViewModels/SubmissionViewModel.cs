@@ -23,7 +23,7 @@ namespace Journal.ViewModels.Shared.EntityViewModels
         public virtual StudentViewModel Student { get; set; }
 
         public int AssignmentId { get; set; }  
-        public virtual AssignmentViewModel Assignment { get; set; }
+        public virtual AssignmentSubmissionsViewModel Assignment { get; set; }
 
         public virtual IEnumerable<CommentViewModel> Comments { get; set; }
     }

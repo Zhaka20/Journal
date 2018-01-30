@@ -7,6 +7,6 @@ namespace Journal.ViewModels.Controller.Assignments
     {
         public IEnumerable<StudentViewModel> Students { get; set; }
         public StudentViewModel StudentModel { get; set; }
-        public AssignmentViewModel Assignment { get; set; }
+        public AssignmentSubmissionsViewModel Assignment { get; set; }
     }
 }

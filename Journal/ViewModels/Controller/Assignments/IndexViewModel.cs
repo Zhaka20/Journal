@@ -5,7 +5,7 @@ namespace Journal.ViewModels.Controller.Assignments
 {
     public class IndexViewModel
     {
-        public IEnumerable<AssignmentViewModel> Assignments { get; set; }
-        public AssignmentViewModel AssignmentModel { get; set; }
+        public IEnumerable<AssignmentSubmissionsViewModel> Assignments { get; set; }
+        public AssignmentSubmissionsViewModel AssignmentModel { get; set; }
     }
 }

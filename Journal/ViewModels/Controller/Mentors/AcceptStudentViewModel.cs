@@ -6,7 +6,7 @@ namespace Journal.ViewModels.Controller.Mentors
     public class AcceptStudentViewModel
     {
         public IEnumerable<StudentViewModel> Students { get; set; }
-        public StudentViewModel StudentVM { get; set; }
+        public StudentViewModel Student { get; set; }
     }
 
 }

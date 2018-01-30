@@ -16,7 +16,7 @@ namespace Journal.ViewModels.Shared.EntityViewModels
         public DateTime? Edited { get; set; }
 
         public int AssignmentId { get; set; }
-        public virtual AssignmentViewModel Assignment { get; set; }
+        public virtual AssignmentSubmissionsViewModel Assignment { get; set; }
 
         public string AuthorId { get; set; }
         public virtual ApplicationUserViewModel Author { get; set; }

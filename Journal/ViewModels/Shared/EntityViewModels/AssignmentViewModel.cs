@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Journal.ViewModels.Shared.EntityViewModels
 {
-    public class AssignmentViewModel
+    public class AssignmentSubmissionsViewModel
     {
         public int AssignmentId { get; set; }
         public string Title { get; set; }
