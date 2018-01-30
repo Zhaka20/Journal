@@ -3,20 +3,28 @@ using System;
 using System.Threading.Tasks;
 using Journal.DataModel.Models;
 using Journal.AbstractDAL.AbstractRepositories;
-using Journal.BLL.Services.Concrete.Common;
+using Journal.BLLtoUIData.DTOs;
+using BLL.Services.Common;
+using BLL.Services.Common.Abstract;
 
 namespace Journal.BLL.Services.Concrete
 {
-    public class StudentDTOService : GenericService<Student, string>, IStudentDTOService
+    public class StudentDTOService : GenericDTOService<StudentDTO, Student, string>, IStudentDTOService
     {
-        public StudentDTOService(IStudentRepository repository) : base(repository)
+        public StudentDTOService(IStudentRepository repository, IObjectToObjectMapper mapper) : base(repository,mapper)
         {
         }
               
-        public async Task<Student> GetStudentByEmailAsync(string studentEmail)
+        public async Task<StudentDTO> GetStudentByEmailAsync(string studentEmail)
         {
             ThrowIfNull(studentEmail);
-            return await repository.GetFirstOrDefaultAsync(s => s.Email == studentEmail);
+            var student =  await currentEntityRepository.GetFirstOrDefaultAsync(s => s.Email == studentEmail);
+            if(student == null)
+            {
+                return default(StudentDTO);
+            }
+            var result = mapper.Map<Student, StudentDTO>(student);
+            return result;
         }
 
         private void ThrowIfNull(object arg)

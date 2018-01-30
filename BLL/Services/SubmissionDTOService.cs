@@ -1,33 +1,38 @@
-﻿using Journal.BLL.Services.Concrete.Common;
-using Journal.DataModel.Models;
+﻿using Journal.DataModel.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Journal.AbstractDAL.AbstractRepositories.Common;
 using Journal.AbstractBLL.AbstractServices;
 using System.IO;
 using Journal.AbstractDAL.AbstractRepositories;
+using Journal.BLLtoUIData.DTOs;
+using BLL.Services.Common;
+using BLL.Services.Common.Abstract;
 
 namespace Journal.BLL.Services.Concrete
 {
-    public class SubmissionDTOService : GenericService<Submission, object[]>, ISubmissionDTOService
+    public class SubmissionDTOService : GenericDTOService<SubmissionDTO, Submission, object[]>, ISubmissionDTOService
     {
         protected readonly ISubmitFileDTOService submitFileService;
 
-        public SubmissionDTOService(ISubmissionRepository repository, ISubmitFileDTOService submitFileService) : base(repository)
+        public SubmissionDTOService(ISubmitFileDTOService submitFileService,
+                                    ISubmissionRepository repository,
+                                    IObjectToObjectMapper mapper)
+                                  : base(repository,mapper)
         {
             this.submitFileService = submitFileService;
         }
 
-        public void DeleteFileFromFSandDBIfExists(SubmitFile submitFile)
+        public void DeleteFileFromFSandDBIfExists(SubmitFileDTO dto)
         {
-            if (submitFile != null)
+            if(dto == null)
             {
-                DeleteFile(submitFile);
+                throw new ArgumentNullException();
             }
-            submitFileService.Delete(submitFile);
+            var submitFileEntity = mapper.Map<SubmitFileDTO, SubmitFile>(dto);
+            if (submitFileEntity != null)
+            {
+                DeleteFile(submitFileEntity);
+            }
+            submitFileService.Delete(dto);
         }
 
         protected void DeleteFile(DataModel.Models.FileInfo file)
@@ -41,14 +46,13 @@ namespace Journal.BLL.Services.Concrete
             }
         }
 
-        public override void Dispose()
+        public void Dispose()
         {
             IDisposable dispose = submitFileService as IDisposable;
             if(dispose != null)
             {
                 dispose.Dispose();
             }
-            base.Dispose();
         }
     }
 }

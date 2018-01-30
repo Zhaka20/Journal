@@ -1,5 +1,6 @@
 ﻿using BLL.Services.Common.Abstract;
 using Journal.AbstractBLL.AbstractServices.Common;
+using Journal.AbstractDAL.AbstractRepositories.Common;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,12 +9,12 @@ namespace BLL.Services.Common
 {
     public abstract class GenericDTOService<TEntityDTO, TEntity, TKey> : IBasicDTOService<TEntityDTO, TKey>
     {
-        protected readonly IGenericService<TEntity, TKey> entityService;
+        protected readonly IGenericRepository<TEntity, TKey> currentEntityRepository;
         protected readonly IObjectToObjectMapper mapper;
 
-        public GenericDTOService(IGenericService<TEntity, TKey> entityService, IObjectToObjectMapper mapper)
+        public GenericDTOService(IGenericRepository<TEntity, TKey> repository, IObjectToObjectMapper mapper)
         {
-            this.entityService = entityService;
+            this.currentEntityRepository = repository;
             this.mapper = mapper;
         }
 
@@ -28,7 +29,7 @@ namespace BLL.Services.Common
             {
                 throw new NullReferenceException("Could not convert dto argument to its corresponding entity.");
             }
-            entityService.Create(entity);
+            currentEntityRepository.Insert(entity);
         }
 
         public void Delete(TEntityDTO dto)
@@ -42,19 +43,19 @@ namespace BLL.Services.Common
             {
                 throw new NullReferenceException("Could not convert dto argument to its corresponding entity.");
             }
-            entityService.Delete(entity);
+            currentEntityRepository.Delete(entity);
         }
 
         public async Task DeleteByIdAsync(TKey id)
         {
-            var entity = await entityService.GetByIdAsync(id);
-            entityService.Delete(entity);
+            var entity = await currentEntityRepository.GetSingleByIdAsync(id);
+            currentEntityRepository.Delete(entity);
         }
 
         public IEnumerable<TEntityDTO> GetAll()
         {
             IEnumerable<TEntityDTO> result = new List<TEntityDTO>();
-            var entities = entityService.GetAll();
+            var entities = currentEntityRepository.GetAll();
             if (entities == null)
             {
                 return result;
@@ -66,7 +67,7 @@ namespace BLL.Services.Common
         public async Task<IEnumerable<TEntityDTO>> GetAllAsync()
         {
             IEnumerable<TEntityDTO> result = new List<TEntityDTO>();
-            var entities = await entityService.GetAllAsync();
+            var entities = await currentEntityRepository.GetAllAsync();
             if (entities == null)
             {
                 return result;
@@ -77,7 +78,7 @@ namespace BLL.Services.Common
 
         public async Task<TEntityDTO> GetByIdAsync(TKey id)
         {
-            var entity = await entityService.GetByIdAsync(id);
+            var entity = await currentEntityRepository.GetSingleByIdAsync(id);
             if (entity == null)
             {
                 return default(TEntityDTO);
@@ -88,7 +89,7 @@ namespace BLL.Services.Common
 
         public Task SaveChangesAsync()
         {
-            return entityService.SaveChangesAsync();
+            return currentEntityRepository.SaveChangesAsync();
         }
 
         public void Update(TEntityDTO dto)
@@ -102,7 +103,7 @@ namespace BLL.Services.Common
             {
                 throw new NullReferenceException("Could not convert dto argument to its corresponding entity.");
             }
-            entityService.Update(entity);
+            currentEntityRepository.Update(entity);
         }
     }
 }

@@ -5,7 +5,6 @@ using Journal.DataModel.Models;
 using Journal.AbstractDAL.AbstractRepositories;
 using BLL.Services.Common;
 using Journal.BLLtoUIData.DTOs;
-using Journal.DAL.Repositories;
 using BLL.Services.Common.Abstract;
 
 namespace Journal.BLL.Services.Concrete
@@ -13,19 +12,20 @@ namespace Journal.BLL.Services.Concrete
     public class MentorDTOService : GenericDTOService<MentorDTO, Mentor, string>, IMentorDTOService
     {
         protected readonly IStudentRepository studentsRepository;
-        protected readonly IMentorRepository mentorsRepository;
 
-        public MentorDTOService(IStudentRepository studentsRepository, IMentorRepository mentorRepository, IGenericService<Mentor, string> entityService, IObjectToObjectMapper mapper) : base(entityService, mapper)
+        public MentorDTOService(IStudentRepository studentsRepository,
+                                IMentorRepository mentorRepository, 
+                                IObjectToObjectMapper mapper)
+                              : base(mentorRepository, mapper)
         {
             this.studentsRepository = studentsRepository;
-            this.mentorsRepository = mentorRepository;
         }
 
 
         public async Task<MentorDTO> GetMentorByEmailAsync(string mentorEmail)
         {
             ThrowIfNull(mentorEmail);
-            var mentor = await mentorsRepository.GetFirstOrDefaultAsync(m => m.Email == mentorEmail);
+            var mentor = await currentEntityRepository.GetFirstOrDefaultAsync(m => m.Email == mentorEmail);
             if(mentor == null)
             {
                 return default(MentorDTO);
@@ -44,7 +44,7 @@ namespace Journal.BLL.Services.Concrete
                 throw new ArgumentException("Student with given id doesn't exit");
             }
 
-            var mentor = await mentorsRepository.GetSingleByIdAsync(mentorId);
+            var mentor = await currentEntityRepository.GetSingleByIdAsync(mentorId);
             if (mentor == null)
             {
                 throw new ArgumentException("Mentor with given id doesn't exit");
@@ -62,7 +62,7 @@ namespace Journal.BLL.Services.Concrete
                 throw new ArgumentException("Student with given id doesn't exit");
             }
 
-            var mentor = await mentorsRepository.GetSingleByIdAsync(mentorId);
+            var mentor = await currentEntityRepository.GetSingleByIdAsync(mentorId);
             if (mentor == null)
             {
                 throw new ArgumentException("Mentor with given id doesn't exit");
@@ -86,7 +86,7 @@ namespace Journal.BLL.Services.Concrete
             {
                 dispose.Dispose();
             }
-            dispose = mentorsRepository as IDisposable;
+            dispose = currentEntityRepository as IDisposable;
             if(dispose != null)
             {
                 dispose.Dispose();
