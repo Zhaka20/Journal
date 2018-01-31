@@ -10,6 +10,8 @@ using Journal.ViewModels.Shared.EntityViewModels;
 using Journal.BLLtoUIData.DTOs;
 using Journal.AbstractBLL.AbstractServices;
 using Journal.WEB.Services.Common;
+using Journal.ViewFactory.Abstractions;
+using Journal.WEB.ViewFactory.BuilderInputData.Controllers.WorkDays;
 
 namespace Journal.Services.ControllerServices
 {
@@ -19,27 +21,32 @@ namespace Journal.Services.ControllerServices
         protected readonly IStudentDTOService studentService;
         protected readonly IAttendanceDTOService attendanceService;
         protected readonly IObjectToObjectMapper mapper;
+        protected readonly IViewFactory viewModelFactory;
 
         public WorkDaysControllerService(IWorkDayDTOService workDayService,
                                          IStudentDTOService studentService,
                                          IAttendanceDTOService attendanceService,
-                                         IObjectToObjectMapper mapper)
+                                         IObjectToObjectMapper mapper,
+                                         IViewFactory viewFactory)
         {
             this.attendanceService = attendanceService;
             this.studentService = studentService;
             this.workDayService = workDayService;
             this.mapper = mapper;
+            this.viewModelFactory = viewFactory;
         }
 
         public async Task<IndexViewModel> GetWorkDaysIndexViewModel()
         {
             IEnumerable<WorkDayDTO> workDayDTOs = await workDayService.GetAllAsync();
-            IEnumerable<WorkDayViewModel> workDayViewModels = mapper.Map<IEnumerable<WorkDayViewModel>, IEnumerable<WorkDayDTO>>(workDayDTOs);
-            IndexViewModel viewModel = new IndexViewModel
+            IEnumerable<WorkDayViewModel> workDayViewModels = viewModelFactory.CreateView<IEnumerable<WorkDayDTO>, IEnumerable<WorkDayViewModel>>(workDayDTOs);
+
+            var viewModelBuilderData = new IndexViewModelBuilderData
             {
-                WorkDay = new WorkDayViewModel(),
-                WorkDays = workDayViewModels
+                WorkDays = workDayDTOs
             };
+            IndexViewModel viewModel = viewModelFactory.CreateView<IndexViewModelBuilderData, IndexViewModel>(viewModelBuilderData);
+            
             return viewModel;
         }
 
@@ -51,12 +58,13 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            WorkDayViewModel workDayViewModel = mapper.Map<WorkDayViewModel, WorkDayDTO>(workDayDTO);
-            DetailsViewModel viewModel = new DetailsViewModel
+
+            var viewModelbuilderData = new DetailsViewModelBuilderData
             {
-                WorkDay = workDayViewModel,
-                AttendanceModel = new AttendanceViewModel()
+                WorkDay = workDayDTO
             };
+
+            DetailsViewModel viewModel = viewModelFactory.CreateView<DetailsViewModelBuilderData, DetailsViewModel>(viewModelbuilderData);          
             return viewModel;
         }
 
@@ -67,6 +75,7 @@ namespace Journal.Services.ControllerServices
                 JournalId = inputModel.JournalId,
                 Day = inputModel.Day
             };
+
             workDayService.Create(newWorkDay);
             await workDayService.SaveChangesAsync();
             return newWorkDay.Id;
@@ -79,12 +88,11 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var dayToEdit = mapper.Map<WorkDayViewModel, WorkDayDTO>(workDayDTO);
-
-            EditViewModel viewModel = new EditViewModel
+            var viewModelbuilderData = new CreateViewModelBuilderData
             {
-                WorkDayToEdit = dayToEdit
+                WorkDay = workDayDTO
             };
+            EditViewModel viewModel = viewModelFactory.CreateView<CreateViewModelBuilderData, EditViewModel>(viewModelbuilderData);                      
             return viewModel;
         }
 
@@ -95,7 +103,7 @@ namespace Journal.Services.ControllerServices
             //    Id = inputModel.WorkDayToEdit.Id,
             //    Day = inputModel.WorkDayToEdit.Day
             //};
-            WorkDayDTO updatedWorkDay = mapper.Map<WorkDayDTO, WorkDayViewModel>(inputModel.WorkDayToEdit);
+            WorkDayDTO updatedWorkDay = mapper.Map<WorkDayViewModel, WorkDayDTO>(inputModel.WorkDayToEdit);
             workDayService.Update();
             await workDayService.SaveChangesAsync();
         }
@@ -107,13 +115,12 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-
-            var workDayViewModel = mapper.Map<WorkDayViewModel, WorkDayDTO>(workDayDTO);
-
-            DeleteViewModel viewModel = new DeleteViewModel
+            var viewModelBuilderData = new DeleteViewModelBuilderData
             {
-                WorkDayToDelete = workDayViewModel
+                WorkDay = workDayDTO
             };
+            var viewModel = viewModelFactory.CreateView<DeleteViewModelBuilderData, DeleteViewModel>(viewModelBuilderData);
+
             return viewModel;
         }
 
@@ -124,7 +131,7 @@ namespace Journal.Services.ControllerServices
             await workDayService.SaveChangesAsync();
         }
 
-        public async Task<AddAttendeesViewModel> GetWorDayAddAttendeesViewModelAsync(int workDayId)
+        public async Task<AddAttendeesViewModel> GetAddAttendeesViewModelAsync(int workDayId)
         {
             string mentorId = HttpContext.Current.User.Identity.GetUserId();
             //IQueryable<Student> mentorsAllStudents = db.Students.Where(s => s.MentorId == mentorId);
@@ -146,12 +153,11 @@ namespace Journal.Services.ControllerServices
             //List<Student> notPresentStudents = await mentorsAllStudents.Except(presentStudents).ToListAsync();
 
             IEnumerable<StudentDTO> notPresentStudents = mentorsAllStudents.Except(presentStudents);
-            IEnumerable<StudentViewModel> notPresentStudentViewModels = mapper.Map<IEnumerable<StudentViewModel>, IEnumerable<StudentDTO>>(notPresentStudents);
-            AddAttendeesViewModel viewModel = new AddAttendeesViewModel
+            var viewModelBuilderData = new AddAttendeesViewModelBuilderData
             {
-                StudentModel = new StudentViewModel(),
-                NotPresentStudents = notPresentStudentViewModels
+                NotPresentStudents = notPresentStudents
             };
+            var viewModel = viewModelFactory.CreateView<AddAttendeesViewModelBuilderData, AddAttendeesViewModel>(viewModelBuilderData);
             return viewModel;
         }
 
@@ -209,11 +215,7 @@ namespace Journal.Services.ControllerServices
 
         public CreateViewModel GetCreateWorkDayViewModel(int journalId)
         {
-            CreateViewModel viewModel = new CreateViewModel
-            {
-                Day = DateTime.Now,
-                JournalId = journalId
-            };
+            CreateViewModel viewModel = viewModelFactory.CreateView<CreateViewModel>();
             return viewModel;
         }
 

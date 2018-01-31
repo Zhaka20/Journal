@@ -15,7 +15,7 @@ namespace Journal.Services.Abstractions
         Task WorkDayUpdateAsync(EditViewModel inputModel);
         Task<DeleteViewModel> GetWorkDayDeleteViewModelAsync(int id);
         Task WorkDayDeleteAsync(int workDayId);
-        Task<AddAttendeesViewModel> GetWorDayAddAttendeesViewModelAsync(int workDayId);
+        Task<AddAttendeesViewModel> GetAddAttendeesViewModelAsync(int workDayId);
         Task AddWorkDayAttendeesAsync(int workDayId, List<string> attendeeIds);
         Task CheckAsLeftAsync(int workDayId, List<int> attendaceIds);
     }
