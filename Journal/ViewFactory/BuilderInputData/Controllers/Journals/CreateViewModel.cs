@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace Journal.ViewModels.Controller.Journals
+﻿namespace Journal.WEB.ViewFactory.BuilderInputData.Controllers.Journal
 {
-    public class CreateViewModel
+    public class CreatePageData
     {
-        public int Year { get; set; }
-        public string MentorId { get; set; }
     }
 }

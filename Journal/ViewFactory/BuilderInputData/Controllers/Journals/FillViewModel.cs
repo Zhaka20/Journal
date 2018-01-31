@@ -1,10 +1,9 @@
-﻿using Journal.ViewModels.Shared.EntityViewModels;
+﻿using Journal.BLLtoUIData.DTOs;
 
-namespace Journal.ViewModels.Controller.Journals
+namespace Journal.WEB.ViewFactory.BuilderInputData.Controllers.Journal
 {
-    public class FillViewModel
+    public class FillPageData
     {
-        public JournalViewModel Journal { get; set; }
-        public WorkDayViewModel WorkDayModel { get; set; }
+        public JournalDTO Journal { get; internal set; }
     }
 }

@@ -1,12 +1,10 @@
-﻿using Journal.ViewModels.Shared.EntityViewModels;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Journal.BLLtoUIData.DTOs;
 
-namespace Journal.ViewModels.Controller.Journals
+namespace Journal.WEB.ViewFactory.BuilderInputData.Controllers.Journal
 {
-    public class IndexViewModel
+    public class IndexPageData
     {
-        public IEnumerable<JournalViewModel> Journals { get; set; }
-        public MentorViewModel MentorModel { get; set; }
-        public JournalViewModel JournalModel { get; set; }
+        public IEnumerable<JournalDTO> Journals { get; internal set; }
     }
 }

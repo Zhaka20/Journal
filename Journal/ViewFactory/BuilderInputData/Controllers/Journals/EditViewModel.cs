@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
+﻿using Journal.BLLtoUIData.DTOs;
 
-namespace Journal.ViewModels.Controller.Journals
+namespace Journal.WEB.ViewFactory.BuilderInputData.Controllers.Journal
 {
-    public class EditViewModel
+    public class EditPageData
     {
-        [Required]
-        public int Year { get; set; }
-        [Required]
-        public int Id { get; set; }
+        public JournalDTO Journal { get; internal set; }
     }
 }
