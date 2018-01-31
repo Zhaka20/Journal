@@ -8,6 +8,6 @@ namespace Journal.ViewModels.Shared.EntityViewModels
 {
     public class AssignmentFileViewModel : FileInfoViewModel
     {
-        public IEnumerable<AssignmentSubmissionsViewModel> Assignments { get; set; }
+        public IEnumerable<AssignmentViewModel> Assignments { get; set; }
     }
 }

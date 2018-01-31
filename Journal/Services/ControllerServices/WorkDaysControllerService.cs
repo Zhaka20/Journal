@@ -41,11 +41,11 @@ namespace Journal.Services.ControllerServices
             IEnumerable<WorkDayDTO> workDayDTOs = await workDayService.GetAllAsync();
             IEnumerable<WorkDayViewModel> workDayViewModels = viewModelFactory.CreateView<IEnumerable<WorkDayDTO>, IEnumerable<WorkDayViewModel>>(workDayDTOs);
 
-            var viewModelBuilderData = new IndexViewModelBuilderData
+            var viewModelBuilderData = new IndexPageData
             {
                 WorkDays = workDayDTOs
             };
-            IndexViewModel viewModel = viewModelFactory.CreateView<IndexViewModelBuilderData, IndexViewModel>(viewModelBuilderData);
+            IndexViewModel viewModel = viewModelFactory.CreateView<IndexPageData, IndexViewModel>(viewModelBuilderData);
             
             return viewModel;
         }
@@ -59,12 +59,18 @@ namespace Journal.Services.ControllerServices
                 return null;
             }
 
-            var viewModelbuilderData = new DetailsViewModelBuilderData
+            var viewModelbuilderData = new DetailsPageData
             {
                 WorkDay = workDayDTO
             };
 
-            DetailsViewModel viewModel = viewModelFactory.CreateView<DetailsViewModelBuilderData, DetailsViewModel>(viewModelbuilderData);          
+            DetailsViewModel viewModel = viewModelFactory.CreateView<DetailsPageData, DetailsViewModel>(viewModelbuilderData);          
+            return viewModel;
+        }
+
+        public CreateViewModel GetCreateWorkDayViewModel(int journalId)
+        {
+            CreateViewModel viewModel = viewModelFactory.CreateView<CreateViewModel>();
             return viewModel;
         }
 
@@ -88,11 +94,11 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var viewModelbuilderData = new CreateViewModelBuilderData
+            EditPageData viewModelbuilderData = new EditPageData
             {
-                WorkDay = workDayDTO
+                WorkDayToEdit = workDayDTO
             };
-            EditViewModel viewModel = viewModelFactory.CreateView<CreateViewModelBuilderData, EditViewModel>(viewModelbuilderData);                      
+            EditViewModel viewModel = viewModelFactory.CreateView<EditPageData, EditViewModel>(viewModelbuilderData);                      
             return viewModel;
         }
 
@@ -115,11 +121,11 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var viewModelBuilderData = new DeleteViewModelBuilderData
+            var viewModelBuilderData = new DeletePageData
             {
                 WorkDay = workDayDTO
             };
-            var viewModel = viewModelFactory.CreateView<DeleteViewModelBuilderData, DeleteViewModel>(viewModelBuilderData);
+            var viewModel = viewModelFactory.CreateView<DeletePageData, DeleteViewModel>(viewModelBuilderData);
 
             return viewModel;
         }
@@ -153,11 +159,11 @@ namespace Journal.Services.ControllerServices
             //List<Student> notPresentStudents = await mentorsAllStudents.Except(presentStudents).ToListAsync();
 
             IEnumerable<StudentDTO> notPresentStudents = mentorsAllStudents.Except(presentStudents);
-            var viewModelBuilderData = new AddAttendeesViewModelBuilderData
+            var viewModelBuilderData = new AddAttendeesPageData
             {
                 NotPresentStudents = notPresentStudents
             };
-            var viewModel = viewModelFactory.CreateView<AddAttendeesViewModelBuilderData, AddAttendeesViewModel>(viewModelBuilderData);
+            var viewModel = viewModelFactory.CreateView<AddAttendeesPageData, AddAttendeesViewModel>(viewModelBuilderData);
             return viewModel;
         }
 
@@ -211,12 +217,6 @@ namespace Journal.Services.ControllerServices
                 await workDayService.SaveChangesAsync();
                 //await db.SaveChangesAsync();
             }
-        }
-
-        public CreateViewModel GetCreateWorkDayViewModel(int journalId)
-        {
-            CreateViewModel viewModel = viewModelFactory.CreateView<CreateViewModel>();
-            return viewModel;
         }
 
         public void Dispose()

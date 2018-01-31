@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Web;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Journal.ViewModels.Shared.EntityViewModels
 {
-    public class AssignmentViewModel
+    public class AssignmentSubmissionsViewModel
     {
         public int AssignmentId { get; set; }
         public string Title { get; set; }
@@ -17,5 +20,6 @@ namespace Journal.ViewModels.Shared.EntityViewModels
         public virtual MentorViewModel Creator { get; set; }
 
         public DateTime Created { get; set; }
+        public virtual IEnumerable<SubmissionViewModel> Submissions { get; set; }
     }
 }

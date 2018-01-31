@@ -10,6 +10,10 @@ using System.Collections.Generic;
 using Journal.BLLtoUIData.DTOs;
 using Journal.ViewModels.Controller.Submissions;
 using Journal.ViewModels.Shared.EntityViewModels;
+using Journal.WEB.ViewFactory.BuilderInputData.Controllers.Submissions;
+using Journal.ViewFactory.Abstractions;
+using Journal.ViewFactory.BuilderInputData.Controllers.Submissions;
+//using Journal.ViewFactory.BuilderInputData.Controllers.Submissions;
 
 namespace Journal.Services.ControllerServices
 {
@@ -17,28 +21,33 @@ namespace Journal.Services.ControllerServices
     {
         protected readonly ISubmissionDTOService service;
         protected readonly IAssignmentDTOService assigmentService;
+        protected readonly IViewFactory viewFactory;
 
-        public SubmissionsControllerService(ISubmissionDTOService service, IAssignmentDTOService assignmentService)
+        public SubmissionsControllerService(ISubmissionDTOService submissionService,
+                                            IAssignmentDTOService assignmentService,
+                                            IViewFactory viewFactory
+                                            )
         {
-            this.service = service;
+            this.viewFactory = viewFactory;
+            this.service = submissionService;
             this.assigmentService = assignmentService;
         }
-        public async Task<IndexViewModel> GetSubmissionsIndexViewModelAsync()
+        public async Task<IndexViewModel> GetIndexViewModelAsync()
         {
             IEnumerable<SubmissionDTO> submissions = await service.GetAllAsync(null, null, null, null,
                                                                             s => s.Assignment,
                                                                             s => s.Student,
                                                                             s => s.SubmitFile);
-            IndexViewModel viewModel = new IndexViewModel
+
+            var pageData = new IndexPageData
             {
-                AssignmentModel = new Assignment(),
-                SubmissionModel = new SubmissionViewModel(),
                 Submissions = submissions
             };
+            IndexViewModel viewModel = viewFactory.CreateView<IndexPageData, IndexViewModel>(pageData);
             return viewModel;
         }
 
-        public async Task<AssignmentViewModel> GetAssignmentSubmissionsViewModelAsync(int assignmentId)
+        public async Task<AssignmentSubmissionsViewModel> GetAssignmentSubmissionsViewModelAsync(int assignmentId)
         {
             AssignmentDTO assignment = await assigmentService.GetFirstOrDefaultAsync(a => a.AssignmentId == assignmentId,
                                                                                   a => a.Creator,
@@ -50,33 +59,33 @@ namespace Journal.Services.ControllerServices
                 return null;
             }
 
-            AssignmentViewModel viewModel = new AssignmentViewModel
+            var pageData = new AssignmentSubmissionsPageData
             {
-                Assignment = assignment,
-                Submissions = assignment.Submissions,
-                SubmissionModel = new Submission(),
-                StudentModel = new Student()
+                Assignment = assignment
             };
+
+
+            var viewModel = viewFactory.CreateView<AssignmentSubmissionsPageData, AssignmentSubmissionsViewModel>(pageData);
             return viewModel;
         }
 
-        public async Task<DetailsViewModel> GetSubmissionDetailsViewModelAsync(int assignmentId, string studentId)
+        public async Task<DetailsViewModel> GetDetailsViewModelAsync(int assignmentId, string studentId)
         {
             SubmissionDTO submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
             if (submission == null)
             {
                 return null;
             }
-            DetailsViewModel viewModel = new DetailsViewModel
+            var pageData = new DetailsPageData
             {
-                Submission = submission,
-                AssignmentModel = new Assignment(),
-                StudentModel = new Student()
+                Submission = submission
             };
+
+            var viewModel = viewFactory.CreateView<DetailsPageData, DetailsViewModel>(pageData);
             return viewModel;
         }
 
-        public async Task<EditViewModel> GetEditSubmissionViewModelAsync(int assignmentId, string studentId)
+        public async Task<EditViewModel> GetEditViewModelAsync(int assignmentId, string studentId)
         {
             SubmissionDTO submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
             if (submission == null)
@@ -84,18 +93,15 @@ namespace Journal.Services.ControllerServices
                 return null;
             }
 
-            EditViewModel viewModel = new EditViewModel
+            var pageData = new EditPageData
             {
-                StudentId = studentId,
-                AssignmentId = assignmentId,
-                Completed = submission.Completed,
-                DueDate = submission.DueDate,
-                Grade = (int)submission.Grade
+                Submission = submission
             };
+            var viewModel = viewFactory.CreateView<EditPageData, EditViewModel>(pageData);
             return viewModel;
         }
 
-        public async Task UpdateSubmissionAsync(EditViewModel viewModel)
+        public async Task UpdateAsync(EditViewModel viewModel)
         {
             SubmissionDTO editedSubmission = new SubmissionDTO
             {
@@ -113,23 +119,23 @@ namespace Journal.Services.ControllerServices
             await service.SaveChangesAsync();
         }
 
-        public async Task<DeleteViewModel> GetDeleteSubmissionViewModelAsync(int assignmentId, string studentId)
+        public async Task<DeleteViewModel> GetDeleteViewModelAsync(int assignmentId, string studentId)
         {
             SubmissionDTO submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
             if (submission == null)
             {
                 return null;
             }
-            DeleteViewModel viewModel = new DeleteViewModel
+            var pageData = new DeletePageData
             {
-                AssignmentModel = new Assignment(),
-                StudentModel = new Student(),
                 Submission = submission
             };
+
+            DeleteViewModel viewModel = viewFactory.CreateView<DeletePageData, DeleteViewModel>(pageData);
             return viewModel;
         }
 
-        public async Task DeleteSubmissionAsync(int assignmentId, string studentId)
+        public async Task DeleteAsync(int assignmentId, string studentId)
         {
             SubmissionDTO submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
             if (submission.SubmitFile != null)
@@ -168,7 +174,7 @@ namespace Journal.Services.ControllerServices
             return fileStream;
         }
 
-        public async Task<bool> ToggleSubmissionCompleteStatusAsync(int assignmentId, string studentId)
+        public async Task<bool> ToggleCompleteStatusAsync(int assignmentId, string studentId)
         {
             SubmissionDTO submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
             if (submission == null)
@@ -180,24 +186,26 @@ namespace Journal.Services.ControllerServices
             return submission.Completed;
         }
 
-        public async Task<EvaluateViewModel> GetSubmissionEvaluateViewModelAsync(int assignmentId, string studentId)
+        public async Task<EvaluateViewModel> GetEvaluateViewModelAsync(int assignmentId, string studentId)
         {
             SubmissionDTO submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
             if (submission == null)
             {
                 return null;
             }
-            EvaluateViewModel viewModel = new EvaluateViewModel
+
+            var pageData = new EvaluatePageData
             {
-                Submission = submission,
-                Grade = (submission.Grade ?? 0),
-                assignmentId = assignmentId,
-                studentId = studentId
+                AssignmentId = assignmentId,
+                StudentId = studentId,
+                Submission = submission
             };
+
+            EvaluateViewModel viewModel = viewFactory.CreateView<EvaluatePageData, EvaluateViewModel>(pageData);
             return viewModel;
         }
 
-        public async Task EvaluateSubmissionAsync(EvaluateInputModel inputModel)
+        public async Task EvaluateAsync(EvaluateInputModel inputModel)
         {
             SubmissionDTO submission = await service.GetByCompositeKeysAsync(inputModel.assignmentId, inputModel.studentId );
             if (submission == null)
@@ -281,7 +289,17 @@ namespace Journal.Services.ControllerServices
         public async Task<SubmissionViewModel> GetSubmissionAsync(int assignmentId, string studentId)
         {
             SubmissionDTO submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
-            return submission;
+            if(submission == null)
+            {
+                return null;
+            }
+            var pageData = new SubmissionPageData
+            {
+                Submission = submission
+            };
+
+            var viewModel = viewFactory.CreateView<SubmissionPageData, SubmissionViewModel>(pageData);
+            return viewModel;
         }
     }
 

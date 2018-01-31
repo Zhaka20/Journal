@@ -6,7 +6,7 @@ namespace Journal.ViewModels.Controller.Assignments
     public class MentorViewModel
     {
         public MentorViewModel Mentor { get; set; }
-        public IEnumerable<AssignmentSubmissionsViewModel> Assignments { get; set; }
-        public AssignmentSubmissionsViewModel AssignmentModel { get; set; }
+        public IEnumerable<AssignmentViewModel> Assignments { get; set; }
+        public AssignmentViewModel AssignmentModel { get; set; }
     }
 }

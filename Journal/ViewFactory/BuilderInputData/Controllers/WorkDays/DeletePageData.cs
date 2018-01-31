@@ -2,7 +2,7 @@
 
 namespace Journal.WEB.ViewFactory.BuilderInputData.Controllers.WorkDays
 {
-    public class DetailsViewModelBuilderData
+    public class DeletePageData
     {
         public WorkDayDTO WorkDay { get; set; }
     }

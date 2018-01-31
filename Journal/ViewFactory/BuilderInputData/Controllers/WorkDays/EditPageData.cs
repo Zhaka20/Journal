@@ -2,8 +2,8 @@
 
 namespace Journal.WEB.ViewFactory.BuilderInputData.Controllers.WorkDays
 {
-    public class CreateViewModelBuilderData
+    public class EditPageData
     {
-        public WorkDayDTO WorkDay { get; set; }
+        public WorkDayDTO WorkDayToEdit { get; set; }
     }
 }

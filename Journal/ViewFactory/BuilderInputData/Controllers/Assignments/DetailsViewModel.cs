@@ -4,6 +4,6 @@ namespace Journal.ViewModels.Controller.Assignments
 {
     public class DetailsViewModel
     {
-        public AssignmentSubmissionsViewModel Assignment { get; set; }
+        public AssignmentViewModel Assignment { get; set; }
     }
 }
