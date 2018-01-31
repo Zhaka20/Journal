@@ -239,12 +239,11 @@
     <Compile Include="ViewFactory\BuilderInputData\Controllers\Mentors\MentorsHomeViewModel.cs" />
     <Compile Include="ViewFactory\BuilderInputData\Controllers\Mentors\MentorsListViewModel.cs" />
     <Compile Include="ViewFactory\BuilderInputData\Controllers\Mentors\StudentViewModel.cs" />
-    <Compile Include="ViewFactory\BuilderInputData\Controllers\Students\CreateViewModel.cs" />
-    <Compile Include="ViewFactory\BuilderInputData\Controllers\Students\DeleteViewModel.cs" />
-    <Compile Include="ViewFactory\BuilderInputData\Controllers\Students\DetailsViewModel.cs" />
-    <Compile Include="ViewFactory\BuilderInputData\Controllers\Students\EditViewModel.cs" />
-    <Compile Include="ViewFactory\BuilderInputData\Controllers\Students\HomeViewModel.cs" />
-    <Compile Include="ViewFactory\BuilderInputData\Controllers\Students\IndexViewModel.cs" />
+    <Compile Include="ViewFactory\BuilderInputData\Controllers\Students\DeletePageData.cs" />
+    <Compile Include="ViewFactory\BuilderInputData\Controllers\Students\DetailsPageData.cs" />
+    <Compile Include="ViewFactory\BuilderInputData\Controllers\Students\EditPageData.cs" />
+    <Compile Include="ViewFactory\BuilderInputData\Controllers\Students\HomePageData.cs" />
+    <Compile Include="ViewFactory\BuilderInputData\Controllers\Students\IndexPageData.cs" />
     <Compile Include="ViewFactory\BuilderInputData\Controllers\Submissions\AssignmentSubmissionsPageData.cs" />
     <Compile Include="ViewFactory\BuilderInputData\Controllers\Submissions\DeletePageData.cs" />
     <Compile Include="ViewFactory\BuilderInputData\Controllers\Submissions\DetailsPageData.cs" />

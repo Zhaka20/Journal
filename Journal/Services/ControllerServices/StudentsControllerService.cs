@@ -7,67 +7,75 @@ using Microsoft.AspNet.Identity;
 using System;
 using Journal.ViewModels.Controller.Students;
 using Journal.BLLtoUIData.DTOs;
-using Journal.ViewModels.Shared.EntityViewModels;
+using Journal.ViewFactory.Abstractions;
+using Journal.WEB.ViewFactory.BuilderInputData.Controllers.Students;
 
 namespace Journal.Services.ControllerServices
 {
     public class StudentsControllerService : IStudentsControllerService
     {
-        private IStudentDTOService service;
-        private ApplicationUserManager userManager;
+        protected readonly IStudentDTOService studentService;
+        protected readonly ApplicationUserManager userManager;
+        protected readonly IViewFactory viewFactory;
 
-        public StudentsControllerService(IStudentDTOService service, ApplicationUserManager userManager)
+        public StudentsControllerService(IStudentDTOService studentService, ApplicationUserManager userManager, IViewFactory viewFactory)
         {
-            this.service = service;
+            this.studentService = studentService;
             this.userManager = userManager;
+            this.viewFactory = viewFactory;
         }
 
         public async Task<IndexViewModel> GetIndexViewModelAsync()
         {
-            IEnumerable<StudentDTO> students = await service.GetAllAsync();
-            IEnumerable<StudentViewModel> studentListVM = students.ToShowStudentVMList();
-            IndexViewModel viewModel = new IndexViewModel
+            IEnumerable<StudentDTO> students = await studentService.GetAllAsync();
+            var pageData = new IndexPageData
             {
-                StudentModel = new ShowViewModel(),
-                Students = studentListVM
+                Students = students
             };
+
+            IndexViewModel viewModel = viewFactory.CreateView<IndexPageData, IndexViewModel>(pageData);
             return viewModel;
         }
 
         public async Task<HomeViewModel> GetHomeViewModelAsync(string studentId)
         {
-            StudentDTO student = await service.GetFirstOrDefaultAsync(
+            StudentDTO student = await studentService.GetFirstOrDefaultAsync(
                                             s => s.Id == studentId,
                                             s => s.Mentor,
                                             s => s.Submissions.Select(sub => sub.Assignment.AssignmentFile),
                                             s => s.Submissions.Select(sub => sub.SubmitFile)
                                             );
 
-            HomeViewModel viewModel = new HomeViewModel
+            var pageData = new HomePageData
             {
                 Student = student,
-                AssignmentModel = new Assignment(),
-                SubmissionModel = new SubmissionViewModel(),
                 Submissions = student.Submissions
             };
+
+            HomeViewModel viewModel = viewFactory.CreateView<HomePageData, HomeViewModel>(pageData);
             return viewModel;
         }
 
 
         public async Task<DetailsViewModel> GetDetailsViewModelAsync(string studentId)
         {
-            StudentDTO student = await service.GetByIdAsync(studentId);
+            StudentDTO student = await studentService.GetByIdAsync(studentId);
             if (student == null)
             {
                 return null;
             }
-            DetailsViewModel viewModel = student.ToStudentDetailsVM();
+            var pageData = new DetailsPageData
+            {
+                Student = student
+            };
+
+            DetailsViewModel viewModel = viewFactory.CreateView<DetailsPageData, DetailsViewModel>(pageData);
             return viewModel;
         }
 
         public CreateViewModel GetCreateViewModel()
         {
-            CreateViewModel viewModel = new CreateViewModel();
+            CreateViewModel viewModel = viewFactory.CreateView<CreateViewModel>();
             return viewModel;
         }
 
@@ -85,55 +93,61 @@ namespace Journal.Services.ControllerServices
 
         public async Task<EditViewModel> GetEditViewModelAsync(string studentId)
         {
-            StudentDTO student = await service.GetByIdAsync(studentId);
+            StudentDTO student = await studentService.GetByIdAsync(studentId);
             if (student == null)
             {
                 return null;
             }
-
-            EditViewModel viewModel = student.ToEditStudentVM();
+            var pageData = new EditPageData
+            {
+                Student = student
+            };
+            EditViewModel viewModel = viewFactory.CreateView<EditPageData, EditViewModel>(pageData);
             return viewModel;
         }
 
         public async Task UpdateAsync(EditViewModel viewModel)
         {
             StudentDTO newStudent = viewModel.ToStudentModel();
-            service.Update(newStudent,
+            studentService.Update(newStudent,
                            e => e.Email,
                            e => e.UserName,
                            e => e.FirstName,
                            e => e.LastName,
                            e => e.PhoneNumber
                          );
-            await service.SaveChangesAsync();
+            await studentService.SaveChangesAsync();
         }
 
         public async Task<DeleteViewModel> GetDeleteViewModelAsync(string studentId)
         {
-            StudentDTO student = await service.GetByIdAsync(studentId);
+            StudentDTO student = await studentService.GetByIdAsync(studentId);
             if (student == null)
             {
                 return null;
             }
-
-            DeleteViewModel viewModel = student.ToDeleteStudentVM();
+            var pageData = new DeletePageData
+            {
+                Student = student
+            };
+            DeleteViewModel viewModel = viewFactory.CreateView<DeletePageData, DeleteViewModel>(pageData);
             return viewModel;
         }
 
         public async Task DeleteAsync(string studentId)
         {
-            await service.DeleteByIdAsync(studentId);
-            await service.SaveChangesAsync();
+            await studentService.DeleteByIdAsync(studentId);
+            await studentService.SaveChangesAsync();
         }
 
         public void Dispose()
         {
-            IDisposable dispose = service as IDisposable;
-            if(dispose != null)
+            IDisposable dispose = studentService as IDisposable;
+            if (dispose != null)
             {
                 dispose.Dispose();
             }
             userManager.Dispose();
-        }        
+        }
     }
 }
