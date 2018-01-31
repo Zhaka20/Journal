@@ -8,6 +8,8 @@ using Journal.AbstractBLL.AbstractServices;
 using Journal.BLLtoUIData.DTOs;
 using Journal.ViewModels.Controller.Mentors;
 using Journal.ViewModels.Shared.EntityViewModels;
+using Journal.ViewFactory.Abstractions;
+using Journal.WEB.ViewFactory.BuilderInputData.Controllers.Mentors;
 
 namespace Journal.Services.ControllerServices
 {
@@ -16,12 +18,14 @@ namespace Journal.Services.ControllerServices
         protected readonly IMentorDTOService mentorService;
         protected readonly ApplicationUserManager userManager;
         protected readonly IStudentDTOService studentService;
+        protected readonly IViewFactory viewFactory;
 
-        public MentorsControllerService(IMentorDTOService service,ApplicationUserManager userManager, IStudentDTOService studentService)
+        public MentorsControllerService(IMentorDTOService service,ApplicationUserManager userManager, IStudentDTOService studentService, IViewFactory viewFactory)
         {
             this.studentService = studentService;
             this.mentorService = service;
             this.userManager = userManager;
+            this.viewFactory = viewFactory;
         }
 
         public async Task<MentorsHomeViewModel> GetHomeViewModelAsync(string mentorId)
@@ -30,20 +34,24 @@ namespace Journal.Services.ControllerServices
                                                                  m => m.Students,
                                                                  m => m.Assignments);
 
-            MentorsHomeViewModel viewModel = new MentorsHomeViewModel
+            var pageData = new HomePageData
             {
-                Mentor = mentor,
-                Journal = new JournalViewModel()
+                Mentor = mentor
             };
+
+            MentorsHomeViewModel viewModel = viewFactory.CreateView<HomePageData, MentorsHomeViewModel>(pageData);
             return viewModel;
         }
 
         public async Task<MentorsListViewModel> GetMentorsListViewModelAsync()
         {
-            MentorsListViewModel viewModel = new MentorsListViewModel
+            var mentors = await mentorService.GetAllAsync();
+            MentorsListPageData pageData = new MentorsListPageData
             {
-                Mentors = await mentorService.GetAllAsync()
+                Mentors = mentors
             };
+
+            MentorsListViewModel viewModel = viewFactory.CreateView<MentorsListPageData, MentorsListViewModel>(pageData);
             return viewModel;
         }
 
@@ -54,18 +62,25 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            DetailsViewModel viewModel = mentor.ToMentorDetailsVM();
+            var pageData = new DetailsPageData
+            {
+                Mentor = mentor
+            };
+
+
+            DetailsViewModel viewModel = viewFactory.CreateView<DetailsPageData, DetailsViewModel>(pageData);
             return viewModel;
         }
 
         public async Task<AcceptStudentViewModel> GetAcceptStudentViewModelAsync(string mentorId)
         {
             IEnumerable<StudentDTO> students = await studentService.GetAllAsync(s => s.Mentor.Id != mentorId);
-            AcceptStudentViewModel viewModel = new AcceptStudentViewModel
+            var pageData = new AcceptStudentPageData
             {
-                Students = students,
-                Student = new StudentViewModel()
+                Students = students
             };
+
+            AcceptStudentViewModel viewModel = viewFactory.CreateView<AcceptStudentPageData, AcceptStudentViewModel>(pageData);
             return viewModel;
         }
 
@@ -82,12 +97,12 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-
-            ExpelStudentViewModel viewModel = new ExpelStudentViewModel
+            var pageData = new ExpelStudentPageData
             {
-                Student = student.ToShowStudentVM(),
-                MentorId = student.MentorId
+                Student = student
             };
+
+            ExpelStudentViewModel viewModel = viewFactory.CreateView<ExpelStudentPageData,ExpelStudentViewModel>(pageData)
             return viewModel;
         }
 
@@ -108,18 +123,18 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            MyStudentViewModel viewModel = new MyStudentViewModel
+
+            var pageData = new MyStudentPageData
             {
-                Student = student,
-                AssignmentModel = new Assignment(),
-                SubmissionModel = new SubmissionViewModel()
+                Student = student
             };
+            MyStudentViewModel viewModel = viewFactory.CreateView<MyStudentPageData, MyStudentViewModel>(pageData);
             return viewModel;
         }
 
         public CreateViewModel GetCreateMentorViewModel()
         {
-            CreateViewModel viewModel = new CreateViewModel();
+            CreateViewModel viewModel = viewFactory.CreateView<CreateViewModel>();
             return viewModel;
         }
 
@@ -142,7 +157,11 @@ namespace Journal.Services.ControllerServices
                 return null;
             }
 
-            EditViewModel viewModel = mentor.ToEditMentorVM();
+            var pageData = new EditPageData
+            {
+                Mentor = mentor
+            };
+            EditViewModel viewModel = viewFactory.CreateView<EditPageData, EditViewModel>(pageData);
             return viewModel;
         }
 
@@ -163,7 +182,12 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            DeleteViewModel viewModel = mentor.ToDeleteMentorVM();
+            var pageData = new DeletePageData
+            {
+                Mentor = mentor
+            };
+
+            DeleteViewModel viewModel = viewFactory.CreateView<DeletePageData, DeleteViewModel>(pageData);
             return viewModel;
         }
 
@@ -187,11 +211,6 @@ namespace Journal.Services.ControllerServices
             {
                 dispose.Dispose();
             }
-        }
-
-        CreateViewModel GetCreateMentorViewModel()
-        {
-            throw new NotImplementedException();
         }
     }
 }
