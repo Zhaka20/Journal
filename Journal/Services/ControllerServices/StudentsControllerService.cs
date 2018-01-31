@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Journal.AbstractBLL.AbstractServices;
-using Journal.Extensions;
 using Microsoft.AspNet.Identity;
-using Journal.DataModel.Models;
 using System;
 using Journal.ViewModels.Controller.Students;
+using Journal.BLLtoUIData.DTOs;
+using Journal.ViewModels.Shared.EntityViewModels;
 
 namespace Journal.Services.ControllerServices
 {
     public class StudentsControllerService : IStudentsControllerService
     {
-        private IStudentService service;
+        private IStudentDTOService service;
         private ApplicationUserManager userManager;
 
-        public StudentsControllerService(IStudentService service, ApplicationUserManager userManager)
+        public StudentsControllerService(IStudentDTOService service, ApplicationUserManager userManager)
         {
             this.service = service;
             this.userManager = userManager;
@@ -24,8 +24,8 @@ namespace Journal.Services.ControllerServices
 
         public async Task<IndexViewModel> GetIndexViewModelAsync()
         {
-            IEnumerable<Student> students = await service.GetAllAsync();
-            IEnumerable<ShowViewModel> studentListVM = students.ToShowStudentVMList();
+            IEnumerable<StudentDTO> students = await service.GetAllAsync();
+            IEnumerable<StudentViewModel> studentListVM = students.ToShowStudentVMList();
             IndexViewModel viewModel = new IndexViewModel
             {
                 StudentModel = new ShowViewModel(),
@@ -36,7 +36,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task<HomeViewModel> GetHomeViewModelAsync(string studentId)
         {
-            Student student = await service.GetFirstOrDefaultAsync(
+            StudentDTO student = await service.GetFirstOrDefaultAsync(
                                             s => s.Id == studentId,
                                             s => s.Mentor,
                                             s => s.Submissions.Select(sub => sub.Assignment.AssignmentFile),
@@ -47,7 +47,7 @@ namespace Journal.Services.ControllerServices
             {
                 Student = student,
                 AssignmentModel = new Assignment(),
-                SubmissionModel = new Submission(),
+                SubmissionModel = new SubmissionViewModel(),
                 Submissions = student.Submissions
             };
             return viewModel;
@@ -56,7 +56,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task<DetailsViewModel> GetDetailsViewModelAsync(string studentId)
         {
-            Student student = await service.GetByIdAsync(studentId);
+            StudentDTO student = await service.GetByIdAsync(studentId);
             if (student == null)
             {
                 return null;
@@ -73,7 +73,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task<IdentityResult> CreateAsync(CreateViewModel viewModel)
         {
-            Student newStudent = viewModel.ToStudentModel();
+            StudentDTO newStudent = viewModel.ToStudentModel();
 
             IdentityResult result = await userManager.CreateAsync(newStudent, viewModel.Password);
             if (result.Succeeded)
@@ -85,7 +85,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task<EditViewModel> GetEditViewModelAsync(string studentId)
         {
-            Student student = await service.GetByIdAsync(studentId);
+            StudentDTO student = await service.GetByIdAsync(studentId);
             if (student == null)
             {
                 return null;
@@ -97,7 +97,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task UpdateAsync(EditViewModel viewModel)
         {
-            Student newStudent = viewModel.ToStudentModel();
+            StudentDTO newStudent = viewModel.ToStudentModel();
             service.Update(newStudent,
                            e => e.Email,
                            e => e.UserName,
@@ -110,7 +110,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task<DeleteViewModel> GetDeleteViewModelAsync(string studentId)
         {
-            Student student = await service.GetByIdAsync(studentId);
+            StudentDTO student = await service.GetByIdAsync(studentId);
             if (student == null)
             {
                 return null;

@@ -6,46 +6,46 @@ using System.Web;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using System.IO;
-using Journal.AbstractBLL.AbstractServices;
 using Microsoft.AspNet.Identity;
-using Journal.DataModel.Models;
 using Journal.ViewModels.Controller.Assignments;
+using Journal.AbstractBLL.AbstractServices;
+using Journal.BLLtoUIData.DTOs;
+using Journal.WEB.Services.Common;
+using Journal.ViewModels.Shared.EntityViewModels;
 
 namespace Journal.Services.ControllerServices
 {
     public class AssignmentsControllerService : IAssignmentsControllerService
     {
-        protected readonly IAssignmentService service;
-        protected readonly IMentorService mentorService;
-        protected readonly IStudentService studentService;
-        protected readonly IAssignmentFileService fileService;
-        protected readonly ISubmissionService submissionService;
+        protected readonly IAssignmentDTOService assignmentService;
+        protected readonly IMentorDTOService mentorService;
+        protected readonly IStudentDTOService studentService;
+        protected readonly IAssignmentFileDTOService fileService;
+        protected readonly ISubmissionDTOService submissionService;
+        protected readonly IObjectToObjectMapper mapper;
 
-        //private IAssignmentRepository repository;
-        //private ApplicationDbContext db;
-        //private IMentorService mentorService;
-        //public AssignmentsControllerService(ApplicationDbContext db, IMentorService mentorService)
-        //{
-        //    this.db = db;
-        //    this.mentorService = mentorService;
-        //}
-
-        public AssignmentsControllerService(IAssignmentService service, IMentorService mentorService, IStudentService studentService, IAssignmentFileService fileService, ISubmissionService submissionService)
+        public AssignmentsControllerService(IAssignmentDTOService service, 
+                                            IMentorDTOService mentorService,
+                                            IStudentDTOService studentService,
+                                            IAssignmentFileDTOService fileService,
+                                            ISubmissionDTOService submissionService,
+                                            IObjectToObjectMapper mapper)
         {
-            this.service = service;
+            this.assignmentService = service;
             this.mentorService = mentorService;
             this.studentService = studentService;
             this.fileService = fileService;
             this.submissionService = submissionService;
+            this.mapper = mapper
         }
 
 
         public async Task<IndexViewModel> GetIndexViewModelAsync()
         {
-            IEnumerable<Assignment> assignments = await service.GetAllAsync(null, null, null, null,
-                                                                            a => a.AssignmentFile,
-                                                                            a => a.Creator,
-                                                                            a => a.Submissions);
+            IEnumerable<AssignmentDTO> assignments = await assignmentService.GetAllAsync(null, null, null, null,
+                                                                             a => a.AssignmentFile,
+                                                                             a => a.Creator,
+                                                                             a => a.Submissions);
 
             IndexViewModel viewModel = new IndexViewModel
             {
@@ -56,7 +56,7 @@ namespace Journal.Services.ControllerServices
         }
         public async Task<DetailsViewModel> GetDetailsViewModelAsync(int assignmentId)
         {
-            Assignment assignment = await service.GetFirstOrDefaultAsync(s => s.AssignmentId == assignmentId,
+            AssignmentDTO assignment = await assignmentService.GetFirstOrDefaultAsync(s => s.AssignmentId == assignmentId,
                                                                               s => s.AssignmentFile,
                                                                               s => s.Creator,
                                                                               s => s.Submissions);
@@ -73,7 +73,7 @@ namespace Journal.Services.ControllerServices
         }
         public async Task<MentorViewModel> GetMentorAssignmentsViewModelAsync(string mentorId)
         {
-            IEnumerable<Assignment> assignments = await service.GetAllAsync(a => a.CreatorId == mentorId);
+            IEnumerable<AssignmentDTO> assignments = await assignmentService.GetAllAsync(a => a.CreatorId == mentorId);
             Mentor mentor = await mentorService.GetByIdAsync(mentorId);
             MentorViewModel viewModel = new MentorViewModel
             {
@@ -89,7 +89,7 @@ namespace Journal.Services.ControllerServices
         public async Task<int> CreateAsync(Controller controller, string mentorId, CreateViewModel inputModel, HttpPostedFileBase file)
         {
 
-            AssignmentFile assignmentFile = new AssignmentFile
+            AssignmentFileDTO assignmentFile = new AssignmentFileDTO
             {
                 FileName = file.FileName,
                 FileGuid = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName)
@@ -99,8 +99,8 @@ namespace Journal.Services.ControllerServices
             string path = Path.Combine(HttpContext.Current.Server.MapPath("~/Files/Assignments"), assignmentFile.FileGuid);
             file.SaveAs(path);
 
-            Mentor mentor = await mentorService.GetByIdAsync(mentorId);
-            Assignment newAssignment = new Assignment
+            MentorDTO mentor = await mentorService.GetByIdAsync(mentorId);
+            AssignmentDTO newAssignment = new AssignmentDTO
             {
                 Title = inputModel.Title,
                 Created = DateTime.Now,
@@ -108,20 +108,21 @@ namespace Journal.Services.ControllerServices
                 AssignmentFile = assignmentFile,
             };
             //fileService.SaveChanges();
-            service.Create(newAssignment);
-            await service.SaveChangesAsync();
+            assignmentService.Create(newAssignment);
+            await assignmentService.SaveChangesAsync();
             return newAssignment.AssignmentId;
         }
         public async Task<CreateAndAssignToSingleUserViewModel> GetCreateAndAssignToSingleUserViewModelAsync(string studentId)
         {
-            Student student = await studentService.GetStudentByEmailAsync(studentId);
-            if (student == null)
+            StudentDTO studentDTO = await studentService.GetStudentByEmailAsync(studentId);
+            if (studentDTO == null)
             {
                 return null;
             }
+            var studentViewModel = studentDTO;
             CreateAndAssignToSingleUserViewModel viewModel = new CreateAndAssignToSingleUserViewModel
             {
-                Student = student,
+                Student = studentViewModel,
                 Title = string.Empty
             };
             return viewModel;
@@ -129,7 +130,7 @@ namespace Journal.Services.ControllerServices
         public async Task<int> CreateAndAssignToSingleUserAsync(Controller controller, string studentId, CreateViewModel inputModel, HttpPostedFileBase file)
         {
 
-            AssignmentFile assignmentFile = new AssignmentFile
+            AssignmentFileDTO assignmentFile = new AssignmentFileDTO
             {
                 FileName = file.FileName,
                 FileGuid = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName)
@@ -140,8 +141,8 @@ namespace Journal.Services.ControllerServices
             file.SaveAs(path);
 
             string mentorId = controller.User.Identity.GetUserId();
-            Mentor mentor = await mentorService.GetByIdAsync(mentorId);
-            Assignment newAssignment = new Assignment
+            MentorDTO mentor = await mentorService.GetByIdAsync(mentorId);
+            AssignmentDTO newAssignment = new AssignmentDTO
             {
                 Title = inputModel.Title,
                 Created = DateTime.Now,
@@ -149,16 +150,16 @@ namespace Journal.Services.ControllerServices
                 AssignmentFile = assignmentFile,
             };
 
-            service.Create(newAssignment);
-            await service.SaveChangesAsync();
+            assignmentService.Create(newAssignment);
+            await assignmentService.SaveChangesAsync();
 
-            Student student = await studentService.GetByIdAsync(studentId);
+            StudentDTO student = await studentService.GetByIdAsync(studentId);
             if (student == null)
             {
                 throw new Exception();
             }
 
-            Submission newSubmission = new Submission
+            SubmissionDTO newSubmission = new SubmissionDTO
             {
                 StudentId = student.Id,
                 AssignmentId = newAssignment.AssignmentId,
@@ -167,13 +168,13 @@ namespace Journal.Services.ControllerServices
 
             student.Submissions.Add(newSubmission);
 
-            await service.SaveChangesAsync();
+            await assignmentService.SaveChangesAsync();
             return newAssignment.AssignmentId;
 
         }
         public async Task<EdtiViewModel> GetEdtiViewModelAsync(int assignmentId)
         {
-            Assignment assignment = await service.GetByIdAsync(assignmentId);
+            AssignmentDTO assignment = await assignmentService.GetByIdAsync(assignmentId);
             if (assignment == null)
             {
                 return null;
@@ -187,16 +188,16 @@ namespace Journal.Services.ControllerServices
         }
         public async Task UpdateAsync(EdtiViewModel inputModel)
         {
-            Assignment updatedAssignment = new Assignment
+            AssignmentDTO updatedAssignment = new AssignmentDTO
             {
                 AssignmentId = inputModel.AssignmentId
             };
-            service.Update(updatedAssignment, a => a.Title);           
-            await service.SaveChangesAsync(); ;
+            assignmentService.Update(updatedAssignment, a => a.Title);           
+            await assignmentService.SaveChangesAsync(); ;
         }
         public async Task<DeleteViewModel> GetDeleteViewModelAsync(int assignmentId)
         {
-            Assignment assignment = await service.GetByIdAsync(assignmentId);
+            AssignmentDTO assignment = await assignmentService.GetByIdAsync(assignmentId);
             if (assignment == null)
             {
                 return null;
@@ -209,23 +210,23 @@ namespace Journal.Services.ControllerServices
         }
         public async Task DeleteAsync(int assignmentId)
         {
-            Assignment assignment = await service.GetFirstOrDefaultAsync(a => a.AssignmentId == assignmentId,
+            AssignmentDTO assignment = await assignmentService.GetFirstOrDefaultAsync(a => a.AssignmentId == assignmentId,
                                                                          a => a.AssignmentFile,
                                                                          a => a.Submissions.Select(s => s.SubmitFile));
 
-            foreach (Submission submission in assignment.Submissions)
+            foreach (SubmissionDTO submission in assignment.Submissions)
             {
                 DeleteFile(submission.SubmitFile);
             }
             DeleteFile(assignment.AssignmentFile);
 
-            service.Delete(assignment);
-            await service.SaveChangesAsync();
+            assignmentService.Delete(assignment);
+            await assignmentService.SaveChangesAsync();
         }
         public async Task<RemoveStudentViewModel> GetRemoveStudentViewModelAsync(int assignmentId, string studentId)
         {
-            Student student = await studentService.GetByIdAsync(studentId);
-            Assignment assignment = await service.GetFirstOrDefaultAsync(a => a.AssignmentId == assignmentId,
+            StudentDTO student = await studentService.GetByIdAsync(studentId);
+            AssignmentDTO assignment = await assignmentService.GetFirstOrDefaultAsync(a => a.AssignmentId == assignmentId,
                                                                          a => a.AssignmentFile);
 
             RemoveStudentViewModel viewModel = new RemoveStudentViewModel
@@ -238,7 +239,7 @@ namespace Journal.Services.ControllerServices
         public async Task RemoveStudentFromAssignmentAsync(int assignmentId, string studentId)
         {
 
-            Submission submission = await submissionService.GetByCompositeKeysAsync(assignmentId, studentId);
+            SubmissionDTO submission = await submissionService.GetByCompositeKeysAsync(assignmentId, studentId);
             if (submission != null)
             {
                 submissionService.Delete(submission);
@@ -247,7 +248,7 @@ namespace Journal.Services.ControllerServices
         }
         public async Task<AssignToStudentViewModel> GetAssignToStudentViewModelAsync(string studentId)
         {
-            Student student = await studentService.GetByIdAsync(studentId);
+            StudentDTO student = await studentService.GetByIdAsync(studentId);
             if (student == null)
             {
                 return null;
@@ -255,14 +256,14 @@ namespace Journal.Services.ControllerServices
 
             string mentorId = HttpContext.Current.User.Identity.GetUserId();
 
-            IEnumerable<Assignment> assignmentsOfThisMentor = await service.GetAllAsync(a => a.CreatorId == mentorId, null,null,null,
+            IEnumerable<AssignmentDTO> assignmentsOfThisMentor = await assignmentService.GetAllAsync(a => a.CreatorId == mentorId, null,null,null,
                                                                                   a => a.Creator,
                                                                                   a => a.Submissions.Select(s => s.Student));
 
-            IEnumerable<Submission> studentsSubmissions = await submissionService.GetAllAsync(s => s.StudentId == studentId);
+            IEnumerable<SubmissionDTO> studentsSubmissions = await submissionService.GetAllAsync(s => s.StudentId == studentId);
             var studentsAssignmentIds = studentsSubmissions.Select(s => s.AssignmentId);
                         
-            IEnumerable<Assignment> notYetAssigned = assignmentsOfThisMentor.Where(a => !studentsAssignmentIds.Contains(a.AssignmentId));
+            IEnumerable<AssignmentDTO> notYetAssigned = assignmentsOfThisMentor.Where(a => !studentsAssignmentIds.Contains(a.AssignmentId));
 
             if (notYetAssigned == null)
             {
@@ -284,22 +285,22 @@ namespace Journal.Services.ControllerServices
                 throw new ArgumentNullException();
             }
 
-            Student student = await studentService.GetByIdAsync(studentId);
+            StudentDTO student = await studentService.GetByIdAsync(studentId);
             if (student == null)
             {
                 return;
             }
 
-            IEnumerable<Assignment> newAssignmentsList = await service.GetAllAsync(a => assignmentIds.Contains(a.AssignmentId));
+            IEnumerable<AssignmentDTO> newAssignmentsList = await assignmentService.GetAllAsync(a => assignmentIds.Contains(a.AssignmentId));
  
             if (newAssignmentsList == null)
             {
                 return;
             }
 
-            foreach (Assignment assignment in newAssignmentsList)
+            foreach (AssignmentDTO assignment in newAssignmentsList)
             {
-                Submission newSubmission = new Submission
+                SubmissionDTO newSubmission = new SubmissionDTO
                 {
                     StudentId = student.Id,
                     AssignmentId = assignment.AssignmentId,
@@ -308,11 +309,11 @@ namespace Journal.Services.ControllerServices
                 assignment.Submissions.Add(newSubmission);
             }
 
-            await service.SaveChangesAsync();
+            await assignmentService.SaveChangesAsync();
         }
         public async Task<AssignToStudentsViewModel> GetAssignToStudentsViewModelAsync(int assigmentId)
         {
-            Assignment assignment = await service.GetFirstOrDefaultAsync(s => s.AssignmentId == assigmentId,
+            AssignmentDTO assignment = await assignmentService.GetFirstOrDefaultAsync(s => s.AssignmentId == assigmentId,
                                                                          a => a.Creator,
                                                                          a => a.Submissions);
                
@@ -323,7 +324,7 @@ namespace Journal.Services.ControllerServices
 
             IEnumerable<string> assignedStudentIds = assignment.Submissions.Select(s => s.StudentId);
 
-            IEnumerable<Student> otherStudents = await studentService.GetAllAsync(s => !assignedStudentIds.Contains(s.Id));
+            IEnumerable<StudentDTO> otherStudents = await studentService.GetAllAsync(s => !assignedStudentIds.Contains(s.Id));
 
             AssignToStudentsViewModel viewModel = new AssignToStudentsViewModel
             {
@@ -339,18 +340,18 @@ namespace Journal.Services.ControllerServices
             {
                 throw new ArgumentNullException("studentIds");
             }
-            Assignment assignment = await service.GetFirstOrDefaultAsync(s => s.AssignmentId == assigmentId,
+            AssignmentDTO assignment = await assignmentService.GetFirstOrDefaultAsync(s => s.AssignmentId == assigmentId,
                                                                    a => a.AssignmentFile);
             if (assignment == null)
             {
                 throw new KeyNotFoundException();
             }
 
-            IEnumerable<Student> students = await studentService.GetAllAsync(s => studentIds.Contains(s.Id));
+            IEnumerable<StudentDTO> students = await studentService.GetAllAsync(s => studentIds.Contains(s.Id));
 
-            foreach (Student student in students)
+            foreach (StudentDTO student in students)
             {
-                Submission newSubmission = new Submission
+                SubmissionDTO newSubmission = new SubmissionDTO
                 {
                     StudentId = student.Id,
                     AssignmentId = (int)assigmentId,
@@ -360,11 +361,11 @@ namespace Journal.Services.ControllerServices
                 student.Submissions.Add(newSubmission);
             }
 
-            await service.SaveChangesAsync();
+            await assignmentService.SaveChangesAsync();
         }
         public async Task<IFileStreamWithInfo> GetAssignmentFileAsync(int assignmentId)
         {
-            Assignment assignment = await service.GetByIdAsync(assignmentId);
+            AssignmentDTO assignment = await assignmentService.GetByIdAsync(assignmentId);
             if (assignment == null || assignment.AssignmentFile == null)
             {
                 return null;
@@ -410,14 +411,14 @@ namespace Journal.Services.ControllerServices
                 dispose.Dispose();
             }
 
-            dispose = service as IDisposable;
+            dispose = assignmentService as IDisposable;
             if (dispose != null)
             {
                 dispose.Dispose();
             }
         }
 
-        private void DeleteFile(DataModel.Models.FileInfo file)
+        private void DeleteFile(Models.FileInfo file)
         {
             if (file == null) return;
 
@@ -430,7 +431,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task<StudentsAndSubmissionsListViewModel> GetStudentsAndSubmissionsListViewModelAsync(int assingmentId)
         {
-            Assignment assignment = await service.GetFirstOrDefaultAsync(s => s.AssignmentId == assingmentId,
+            AssignmentDTO assignment = await assignmentService.GetFirstOrDefaultAsync(s => s.AssignmentId == assingmentId,
                                                                          a => a.AssignmentFile,  
                                                                          a => a.Creator,         
                                                                          a => a.Submissions.Select(s => s.Student));
@@ -439,6 +440,7 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
+
             StudentsAndSubmissionsListViewModel viewModel = new StudentsAndSubmissionsListViewModel
             {
                 Assignment = assignment,

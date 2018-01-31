@@ -2,25 +2,25 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Journal.DataModel.Models;
 using Journal.AbstractBLL.AbstractServices;
 using Journal.ViewModels.Controller.Journals;
-using Journal.ViewModels.Controller.WorkDays;
+using Journal.BLLtoUIData.DTOs;
+using Journal.ViewModels.Shared.EntityViewModels;
 
 namespace Journal.Services.ControllerServices
 {
     public class JournalsControllerService : IJournalsControllerService
     {
-        protected readonly IJournalService service;
+        protected readonly IJournalDTOService service;
 
-        public JournalsControllerService(IJournalService service)
+        public JournalsControllerService(IJournalDTOService service)
         {
             this.service = service;
         }
 
         public async Task<FillViewModel> GetFillViewModelAsync(int journalId)
         {
-            Journal journal = await service.GetFirstOrDefaultAsync(j => j.Id == journalId,
+            JournalDTO journal = await service.GetFirstOrDefaultAsync(j => j.Id == journalId,
                                                                    a => a.WorkDays,
                                                                    b => b.Mentor);
             if (journal == null)
@@ -30,16 +30,16 @@ namespace Journal.Services.ControllerServices
             FillViewModel viewModel = new FillViewModel
             {
                 Journal = journal,
-                WorkDayModel = new WorkDay()
+                WorkDayModel = new WorkDayViewModel()
             };
 
             return viewModel;
         }
 
-        public async Task CreateWorkDayAsync(ViewModels.WorkDays.CreateViewModel viewModel)
+        public async Task CreateWorkDayAsync(ViewModels.Controller.WorkDays.CreateViewModel viewModel)
         {
-            Journal journal = await service.GetByIdAsync(viewModel.JournalId);
-            WorkDay newWorkDay = new WorkDay
+            JournalDTO journal = await service.GetByIdAsync(viewModel.JournalId);
+            WorkDayDTO newWorkDay = new WorkDayDTO
             {
                 JournalId = viewModel.JournalId,
                 Day = viewModel.Day
@@ -48,37 +48,37 @@ namespace Journal.Services.ControllerServices
             await service.SaveChangesAsync();
         }
 
-        public async Task<ViewModels.Journals.IndexViewModel> GetJournalsIndexViewModelAsync()
+        public async Task<IndexViewModel> GetJournalsIndexViewModelAsync()
         {
-            IEnumerable<Journal> journals = await service.GetAllAsync(includeProperties: j => j.Mentor);
-            ViewModels.Journals.IndexViewModel viewModel = new ViewModels.Journals.IndexViewModel
+            IEnumerable<JournalDTO> journals = await service.GetAllAsync(includeProperties: j => j.Mentor);
+            IndexViewModel viewModel = new IndexViewModel
             {
                 Journals = journals,
-                JournalModel = new Journal(),
-                MentorModel = new Mentor()
+                JournalModel = new JournalViewModel(),
+                MentorModel = new MentorViewModel()
             };
             return viewModel;
         }
 
-        public async Task<ViewModels.Journals.DetailsViewModel> GetJournalDetailsViewModelAsync(int journalId)
+        public async Task<DetailsViewModel> GetJournalDetailsViewModelAsync(int journalId)
         {
-            Journal journal = await service.GetFirstOrDefaultAsync(j => j.Id == journalId,
+            JournalDTO journal = await service.GetFirstOrDefaultAsync(j => j.Id == journalId,
                                                                    j => j.Mentor);
                
             if (journal == null)
             {
                 return null;
             }
-            ViewModels.Journals.DetailsViewModel viewModel = new ViewModels.Journals.DetailsViewModel
+            DetailsViewModel viewModel = new DetailsViewModel
             {
                 Journal = journal
             };
             return viewModel;
         }
 
-        public async Task<int> CreateJournalAsync(ViewModels.Journals.CreateViewModel viewModel)
+        public async Task<int> CreateJournalAsync(CreateViewModel viewModel)
         {
-            Journal newJournal = new Journal
+            JournalDTO newJournal = new JournalDTO
             {
                 Year = viewModel.Year,
                 MentorId = viewModel.MentorId,
@@ -89,16 +89,16 @@ namespace Journal.Services.ControllerServices
             return newJournal.Id;
         }
 
-        public async Task<ViewModels.Journals.EditViewModel> GetEditJournalViewModelAsync(int journalId)
+        public async Task<EditViewModel> GetEditJournalViewModelAsync(int journalId)
         {
-            Journal journal = await service.GetFirstOrDefaultAsync(j => j.Id == journalId,
+            JournalDTO journal = await service.GetFirstOrDefaultAsync(j => j.Id == journalId,
                                                                    j => j.Mentor);
             if (journal == null)
             {
                 return null;
             }
 
-            ViewModels.Journals.EditViewModel viewModel = new ViewModels.Journals.EditViewModel
+            EditViewModel viewModel = new EditViewModel
             {
                 Year = journal.Year,
                 Id = journal.Id
@@ -108,7 +108,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task UpdateJournalAsync(ViewModels.Journals.EditViewModel viewModel)
         {
-            Journal updatedJournal = new Journal
+            JournalDTO updatedJournal = new JournalDTO
             {
                 Id = viewModel.Id,
                 Year = viewModel.Year,
@@ -117,14 +117,14 @@ namespace Journal.Services.ControllerServices
             await service.SaveChangesAsync();
         }
 
-        public async Task<ViewModels.Journals.DeleteViewModel> GetDeleteJournalViewModelAsync(int journalId)
+        public async Task<DeleteViewModel> GetDeleteJournalViewModelAsync(int journalId)
         {
-            Journal journal = await service.GetByIdAsync(journalId);
+            JournalDTO journal = await service.GetByIdAsync(journalId);
             if (journal == null)
             {
                 return null;
             }
-            ViewModels.Journals.DeleteViewModel viewModel = new ViewModels.Journals.DeleteViewModel
+            DeleteViewModel viewModel = new DeleteViewModel
             {
                 Journal = journal
             };
@@ -133,7 +133,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task DeleteJournalAsync(int journalId)
         {
-            Journal journal = await service.GetByIdAsync(journalId);
+            JournalDTO journal = await service.GetByIdAsync(journalId);
             service.Delete(journal);
             await service.SaveChangesAsync();
         }
@@ -147,9 +147,9 @@ namespace Journal.Services.ControllerServices
             }
         }
 
-        ViewModels.WorkDays.CreateViewModel IJournalsControllerService.GetCreateWorkDayViewModel(int journalId)
+        ViewModels.Controller.WorkDays.CreateViewModel GetCreateWorkDayViewModel(int journalId)
         {
-            ViewModels.WorkDays.CreateViewModel viewModel = new ViewModels.WorkDays.CreateViewModel
+            ViewModels.Controller.WorkDays.CreateViewModel viewModel = new ViewModels.Controller.WorkDays.CreateViewModel
             {
                 Day = DateTime.Now,
                 JournalId = journalId
@@ -157,18 +157,12 @@ namespace Journal.Services.ControllerServices
             return viewModel;
         }
 
-        ViewModels.Journals.CreateViewModel IJournalsControllerService.GetCreateJournalViewModel(string mentorId)
+        CreateViewModel GetCreateJournalViewModel(string mentorId)
         {
-            Journal journal = new Journal
+            CreateViewModel viewModel = new CreateViewModel
             {
                 MentorId = mentorId,
                 Year = DateTime.Now.Year
-            };
-
-            ViewModels.Journals.CreateViewModel viewModel = new ViewModels.Journals.CreateViewModel
-            {
-                MentorId = journal.MentorId,
-                Year = journal.Year
             };
             return viewModel;
         }

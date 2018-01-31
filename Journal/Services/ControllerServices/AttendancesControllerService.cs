@@ -1,17 +1,17 @@
 ﻿using Journal.Services.Abstractions;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Journal.DataModel.Models;
-using Journal.AbstractBLL.AbstractServices;
 using System;
 using Journal.ViewModels.Controller.Attendances;
+using Journal.BLLtoUIData.DTOs;
+using Journal.AbstractBLL.AbstractServices;
 
 namespace Journal.Services.ControllerServices
 {
     public class AttendancesControllerService : IAttendancesControllerService
     {
-        protected readonly IAttendanceService service;
-        public AttendancesControllerService(IAttendanceService service)
+        protected readonly IAttendanceDTOService service;
+        public AttendancesControllerService(IAttendanceDTOService service)
         {
             this.service = service;
         }
@@ -19,7 +19,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task<IndexViewModel> GetAttendancesIndexViewModelAsync()
         {
-            IEnumerable<Attendance> attendances = await service.GetAllAsync(null, null, null, null, a => a.Day, a => a.Student );
+            IEnumerable<AttendanceDTO> attendances = await service.GetAllAsync(null, null, null, null, a => a.Day, a => a.Student );
             IndexViewModel viewModel = new IndexViewModel
             {
                 Attendances = attendances,
@@ -30,7 +30,7 @@ namespace Journal.Services.ControllerServices
         }
         public async Task<DetailsViewModel> GetAttendancesDetailsViewModelAsync(int attendanceId)
         {
-            Attendance attendance = await service.GetByIdAsync(attendanceId);
+            AttendanceDTO attendance = await service.GetByIdAsync(attendanceId);
             if (attendance == null)
             {
                 return null;
@@ -43,7 +43,7 @@ namespace Journal.Services.ControllerServices
         }
         public async Task<EditViewModel> GetEditAttendanceViewModelAsync(int attendanceId)
         {
-            Attendance attendance = await service.GetByIdAsync(attendanceId);
+            AttendanceDTO attendance = await service.GetByIdAsync(attendanceId);
             if (attendance == null)
             {
                 return null;
@@ -58,7 +58,7 @@ namespace Journal.Services.ControllerServices
         }
         public async Task UpdateAsync(EditViewModel inputModel)
         {
-            Attendance updatedAttendance = new Attendance
+            AttendanceDTO updatedAttendance = new AttendanceDTO
             {
                 Id = inputModel.Id,
                 Left = inputModel.Left,
@@ -69,7 +69,7 @@ namespace Journal.Services.ControllerServices
         }
         public async Task<DeleteViewModel> GetDeleteAttendanceViewModelAsync(int attendanceId)
         {
-            Attendance attendance = await service.GetByIdAsync(attendanceId);
+            AttendanceDTO attendance = await service.GetByIdAsync(attendanceId);
             if (attendance == null)
             {
                 return null;
@@ -82,7 +82,7 @@ namespace Journal.Services.ControllerServices
         }
         public async Task DeleteAsync(DeleteInputModel inputModel)
         {
-            Attendance attendanceToRemove = new Attendance { Id = inputModel.Id };
+            AttendanceDTO attendanceToRemove = new AttendanceDTO { Id = inputModel.Id };
             service.Delete(attendanceToRemove);
             await service.SaveChangesAsync();
         }

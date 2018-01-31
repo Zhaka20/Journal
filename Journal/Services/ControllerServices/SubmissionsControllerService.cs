@@ -5,33 +5,34 @@ using System.Web;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using System.IO;
-using Journal.DataModel.Models;
 using Journal.AbstractBLL.AbstractServices;
 using System.Collections.Generic;
+using Journal.BLLtoUIData.DTOs;
 using Journal.ViewModels.Controller.Submissions;
+using Journal.ViewModels.Shared.EntityViewModels;
 
 namespace Journal.Services.ControllerServices
 {
     public class SubmissionsControllerService : ISubmissionsControllerService
     {
-        protected readonly ISubmissionService service;
-        protected readonly IAssignmentService assigmentService;
+        protected readonly ISubmissionDTOService service;
+        protected readonly IAssignmentDTOService assigmentService;
 
-        public SubmissionsControllerService(ISubmissionService service, IAssignmentService assignmentService)
+        public SubmissionsControllerService(ISubmissionDTOService service, IAssignmentDTOService assignmentService)
         {
             this.service = service;
             this.assigmentService = assignmentService;
         }
         public async Task<IndexViewModel> GetSubmissionsIndexViewModelAsync()
         {
-            IEnumerable<Submission> submissions = await service.GetAllAsync(null, null, null, null,
+            IEnumerable<SubmissionDTO> submissions = await service.GetAllAsync(null, null, null, null,
                                                                             s => s.Assignment,
                                                                             s => s.Student,
                                                                             s => s.SubmitFile);
             IndexViewModel viewModel = new IndexViewModel
             {
                 AssignmentModel = new Assignment(),
-                SubmissionModel = new Submission(),
+                SubmissionModel = new SubmissionViewModel(),
                 Submissions = submissions
             };
             return viewModel;
@@ -39,7 +40,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task<AssignmentViewModel> GetAssignmentSubmissionsViewModelAsync(int assignmentId)
         {
-            Assignment assignment = await assigmentService.GetFirstOrDefaultAsync(a => a.AssignmentId == assignmentId,
+            AssignmentDTO assignment = await assigmentService.GetFirstOrDefaultAsync(a => a.AssignmentId == assignmentId,
                                                                                   a => a.Creator,
                                                                                   a => a.Submissions.Select(s => s.Student),
                                                                                   a => a.Submissions.Select(s => s.SubmitFile));
@@ -61,7 +62,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task<DetailsViewModel> GetSubmissionDetailsViewModelAsync(int assignmentId, string studentId)
         {
-            Submission submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
+            SubmissionDTO submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
             if (submission == null)
             {
                 return null;
@@ -77,7 +78,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task<EditViewModel> GetEditSubmissionViewModelAsync(int assignmentId, string studentId)
         {
-            Submission submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
+            SubmissionDTO submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
             if (submission == null)
             {
                 return null;
@@ -96,7 +97,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task UpdateSubmissionAsync(EditViewModel viewModel)
         {
-            Submission editedSubmission = new Submission
+            SubmissionDTO editedSubmission = new SubmissionDTO
             {
                 AssignmentId = viewModel.AssignmentId,
                 StudentId = viewModel.StudentId,
@@ -114,7 +115,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task<DeleteViewModel> GetDeleteSubmissionViewModelAsync(int assignmentId, string studentId)
         {
-            Submission submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
+            SubmissionDTO submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
             if (submission == null)
             {
                 return null;
@@ -130,7 +131,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task DeleteSubmissionAsync(int assignmentId, string studentId)
         {
-            Submission submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
+            SubmissionDTO submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
             if (submission.SubmitFile != null)
             {
                 DeleteFile(submission.SubmitFile);
@@ -141,7 +142,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task<IFileStreamWithInfo> GetSubmissionFileAsync(Controller controller, int assignmentId, string studentId)
         {
-            Submission submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
+            SubmissionDTO submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
             if (submission == null || submission.SubmitFile == null)
             {
                 return null;
@@ -169,7 +170,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task<bool> ToggleSubmissionCompleteStatusAsync(int assignmentId, string studentId)
         {
-            Submission submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
+            SubmissionDTO submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
             if (submission == null)
             {
                 throw new Exception();
@@ -181,7 +182,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task<EvaluateViewModel> GetSubmissionEvaluateViewModelAsync(int assignmentId, string studentId)
         {
-            Submission submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
+            SubmissionDTO submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
             if (submission == null)
             {
                 return null;
@@ -198,7 +199,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task EvaluateSubmissionAsync(EvaluateInputModel inputModel)
         {
-            Submission submission = await service.GetByCompositeKeysAsync(inputModel.assignmentId, inputModel.studentId );
+            SubmissionDTO submission = await service.GetByCompositeKeysAsync(inputModel.assignmentId, inputModel.studentId );
             if (submission == null)
             {
                 throw new Exception();
@@ -210,7 +211,7 @@ namespace Journal.Services.ControllerServices
 
         public async Task UploadFileAsync(Controller controller, HttpPostedFileBase file, int assignmentId, string studentId)
         {
-            Submission submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
+            SubmissionDTO submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
             if (submission == null)
             {
                 throw new Exception();
@@ -277,9 +278,9 @@ namespace Journal.Services.ControllerServices
             }
         }
 
-        public async Task<Submission> GetSubmissionAsync(int assignmentId, string studentId)
+        public async Task<SubmissionViewModel> GetSubmissionAsync(int assignmentId, string studentId)
         {
-            Submission submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
+            SubmissionDTO submission = await service.GetByCompositeKeysAsync(assignmentId, studentId );
             return submission;
         }
     }

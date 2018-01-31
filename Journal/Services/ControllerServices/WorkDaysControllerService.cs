@@ -7,9 +7,9 @@ using Journal.ViewModels.Controller.WorkDays;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Journal.ViewModels.Shared.EntityViewModels;
-using Journal.Services.Common;
 using Journal.BLLtoUIData.DTOs;
 using Journal.AbstractBLL.AbstractServices;
+using Journal.WEB.Services.Common;
 
 namespace Journal.Services.ControllerServices
 {
@@ -18,12 +18,12 @@ namespace Journal.Services.ControllerServices
         protected readonly IWorkDayDTOService workDayService;
         protected readonly IStudentDTOService studentService;
         protected readonly IAttendanceDTOService attendanceService;
-        protected readonly IObjectMapper mapper;
+        protected readonly IObjectToObjectMapper mapper;
 
         public WorkDaysControllerService(IWorkDayDTOService workDayService,
                                          IStudentDTOService studentService,
                                          IAttendanceDTOService attendanceService,
-                                         IObjectMapper mapper)
+                                         IObjectToObjectMapper mapper)
         {
             this.attendanceService = attendanceService;
             this.studentService = studentService;
