@@ -188,7 +188,6 @@ namespace Journal.Services.ControllerServices
                 }
                 await workDayService.SaveChangesAsync();
             }
-
         }
 
         public async Task CheckAsLeftAsync(int workDayId, List<int> attendaceIds)
