@@ -5,6 +5,11 @@ namespace Journal.WEB.ViewFactory.BuilderInputData.Controllers.Submissions
 {
     public class DeletePageData
     {
+        public DeletePageData(SubmissionDTO submission)
+        {
+            Submission = submission;
+        }
+
         public SubmissionDTO Submission { get; set; }
     }
 }

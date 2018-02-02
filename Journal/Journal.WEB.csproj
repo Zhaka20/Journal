@@ -167,6 +167,21 @@
     <Compile Include="App_Start\IdentityConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
+    <Compile Include="DTOFactory\Abstractions\IDTOBuilder.cs" />
+    <Compile Include="DTOFactory\Abstractions\IDTOFactory.cs" />
+    <Compile Include="DTOFactory\BuilderInputData\ApplicationUserDTOBuilderData.cs" />
+    <Compile Include="DTOFactory\BuilderInputData\AssignmentDTOBuilderData.cs" />
+    <Compile Include="DTOFactory\BuilderInputData\AssignmentFileDTOBuilderData.cs" />
+    <Compile Include="DTOFactory\BuilderInputData\AttendanceDTOBuilderData.cs" />
+    <Compile Include="DTOFactory\BuilderInputData\CommentDTOBuilderData.cs" />
+    <Compile Include="DTOFactory\BuilderInputData\FileInfoDTOBuilderData.cs" />
+    <Compile Include="DTOFactory\BuilderInputData\JournalDTOBuilderData.cs" />
+    <Compile Include="DTOFactory\BuilderInputData\MentorDTOBuilderData.cs" />
+    <Compile Include="DTOFactory\BuilderInputData\StudentAttendanceDTOBuilderData.cs" />
+    <Compile Include="DTOFactory\BuilderInputData\StudentDTOBuilderData.cs" />
+    <Compile Include="DTOFactory\BuilderInputData\SubmissionDTOBuilderData.cs" />
+    <Compile Include="DTOFactory\BuilderInputData\SubmitFileDTOBuilderData.cs" />
+    <Compile Include="DTOFactory\BuilderInputData\WorkDayDTOBuilderData.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

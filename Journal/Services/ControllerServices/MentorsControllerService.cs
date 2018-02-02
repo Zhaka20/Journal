@@ -10,6 +10,8 @@ using Journal.ViewModels.Controller.Mentors;
 using Journal.ViewModels.Shared.EntityViewModels;
 using Journal.ViewFactory.Abstractions;
 using Journal.WEB.ViewFactory.BuilderInputData.Controllers.Mentors;
+using Journal.DTOFactory.Abstractions;
+using Journal.DTOBuilderDataFactory.BuilderInputData;
 
 namespace Journal.Services.ControllerServices
 {
@@ -19,39 +21,31 @@ namespace Journal.Services.ControllerServices
         protected readonly ApplicationUserManager userManager;
         protected readonly IStudentDTOService studentService;
         protected readonly IViewFactory viewFactory;
+        protected readonly IDTOFactory dtoFactory;
 
-        public MentorsControllerService(IMentorDTOService service,ApplicationUserManager userManager, IStudentDTOService studentService, IViewFactory viewFactory)
+        public MentorsControllerService(IMentorDTOService service,ApplicationUserManager userManager, IStudentDTOService studentService, IViewFactory viewFactory,IDTOFactory dtoFactory)
         {
             this.studentService = studentService;
             this.mentorService = service;
             this.userManager = userManager;
             this.viewFactory = viewFactory;
+            this.dtoFactory = dtoFactory;
         }
 
         public async Task<MentorsHomeViewModel> GetHomeViewModelAsync(string mentorId)
         {
-            MentorDTO mentor = await mentorService.GetFirstOrDefaultAsync(m => m.Id == mentorId,
-                                                                 m => m.Students,
-                                                                 m => m.Assignments);
+            MentorDTO mentor = await mentorService.GetByIdWithStudentsAndAssignmentsAsync(mentorId);
 
-            var pageData = new HomePageData
-            {
-                Mentor = mentor
-            };
-
-            MentorsHomeViewModel viewModel = viewFactory.CreateView<HomePageData, MentorsHomeViewModel>(pageData);
+            var viewModelData = new HomePageData(mentor);
+            MentorsHomeViewModel viewModel = viewFactory.CreateView<HomePageData, MentorsHomeViewModel>(viewModelData);
             return viewModel;
         }
 
         public async Task<MentorsListViewModel> GetMentorsListViewModelAsync()
         {
             var mentors = await mentorService.GetAllAsync();
-            MentorsListPageData pageData = new MentorsListPageData
-            {
-                Mentors = mentors
-            };
-
-            MentorsListViewModel viewModel = viewFactory.CreateView<MentorsListPageData, MentorsListViewModel>(pageData);
+            MentorsListPageData viewModelData = new MentorsListPageData(mentors);
+            MentorsListViewModel viewModel = viewFactory.CreateView<MentorsListPageData, MentorsListViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -62,25 +56,16 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var pageData = new DetailsPageData
-            {
-                Mentor = mentor
-            };
-
-
-            DetailsViewModel viewModel = viewFactory.CreateView<DetailsPageData, DetailsViewModel>(pageData);
+            var viewModelData = new DetailsPageData(mentor);
+            DetailsViewModel viewModel = viewFactory.CreateView<DetailsPageData, DetailsViewModel>(viewModelData);
             return viewModel;
         }
 
         public async Task<AcceptStudentViewModel> GetAcceptStudentViewModelAsync(string mentorId)
         {
-            IEnumerable<StudentDTO> students = await studentService.GetAllAsync(s => s.Mentor.Id != mentorId);
-            var pageData = new AcceptStudentPageData
-            {
-                Students = students
-            };
-
-            AcceptStudentViewModel viewModel = viewFactory.CreateView<AcceptStudentPageData, AcceptStudentViewModel>(pageData);
+            IEnumerable<StudentDTO> students = await studentService.GetNotMyStudents(mentorId);
+            var viewModelData = new AcceptStudentPageData(students);
+            AcceptStudentViewModel viewModel = viewFactory.CreateView<AcceptStudentPageData, AcceptStudentViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -97,12 +82,9 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var pageData = new ExpelStudentPageData
-            {
-                Student = student
-            };
+            var viewModelData = new ExpelStudentPageData(student);
 
-            ExpelStudentViewModel viewModel = viewFactory.CreateView<ExpelStudentPageData,ExpelStudentViewModel>(pageData)
+            ExpelStudentViewModel viewModel = viewFactory.CreateView<ExpelStudentPageData, ExpelStudentViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -114,21 +96,15 @@ namespace Journal.Services.ControllerServices
 
         public async Task<MyStudentViewModel> GetStudentViewModelAsync(string studentId)
         {
-            StudentDTO student = await studentService.GetFirstOrDefaultAsync(s => s.Id == studentId,
-                                                   s => s.Mentor,
-                                                   s => s.Submissions.Select(sub => sub.SubmitFile),
-                                                   s => s.Submissions.Select(sub => sub.Assignment.AssignmentFile));
+            StudentDTO student = await studentService.GetByIdAsyncWithMentorSubmissionsFilesAndAssignmentFile(studentId);
 
             if(student == null)
             {
                 return null;
             }
 
-            var pageData = new MyStudentPageData
-            {
-                Student = student
-            };
-            MyStudentViewModel viewModel = viewFactory.CreateView<MyStudentPageData, MyStudentViewModel>(pageData);
+            var viewModelData = new MyStudentPageData(student);
+            MyStudentViewModel viewModel = viewFactory.CreateView<MyStudentPageData, MyStudentViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -140,7 +116,8 @@ namespace Journal.Services.ControllerServices
 
         public async Task<IdentityResult> CreateMentorAsync(CreateViewModel viewModel)
         {
-            MentorDTO newMenotor = viewModel.ToMentorModel();
+            MentorDTOBuilderData builderData = new MentorDTOBuilderData(viewModel);
+            MentorDTO newMenotor = dtoFactory.CreateDTO<MentorDTOBuilderData, MentorDTO>(builderData);
             IdentityResult result = await userManager.CreateAsync(newMenotor, viewModel.Password);
             if (result.Succeeded)
             {
@@ -157,21 +134,16 @@ namespace Journal.Services.ControllerServices
                 return null;
             }
 
-            var pageData = new EditPageData
-            {
-                Mentor = mentor
-            };
-            EditViewModel viewModel = viewFactory.CreateView<EditPageData, EditViewModel>(pageData);
+            var viewModelData = new EditPageData(mentor);
+            EditViewModel viewModel = viewFactory.CreateView<EditPageData, EditViewModel>(viewModelData);
             return viewModel;
         }
 
         public async Task UpdateMentorAsync(EditViewModel viewModel)
         {
-            Mentor newMentor = viewModel.ToMentorModel();
-            mentorService.Update(newMentor,  e => e.UserName,
-                                       e => e.FirstName,
-                                       e => e.LastName,
-                                       e => e.PhoneNumber);
+            MentorDTOBuilderData builderData = new MentorDTOBuilderData(viewModel);
+            MentorDTO newMentor = dtoFactory.CreateDTO<MentorDTOBuilderData, MentorDTO>(builderData);
+            mentorService.UpdateMentorsBaseData(newMentor);
             await mentorService.SaveChangesAsync();
         }
 
@@ -182,12 +154,8 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var pageData = new DeletePageData
-            {
-                Mentor = mentor
-            };
-
-            DeleteViewModel viewModel = viewFactory.CreateView<DeletePageData, DeleteViewModel>(pageData);
+            var viewModelData = new DeletePageData(mentor);
+            DeleteViewModel viewModel = viewFactory.CreateView<DeletePageData, DeleteViewModel>(viewModelData);
             return viewModel;
         }
 

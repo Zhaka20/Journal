@@ -4,6 +4,11 @@ namespace Journal.WEB.ViewFactory.BuilderInputData.Controllers.WorkDays
 {
     public class EditPageData
     {
-        public WorkDayDTO WorkDayToEdit { get; set; }
+        private WorkDayDTO workDayDTO;
+
+        public EditPageData(WorkDayDTO workDayDTO)
+        {
+            this.workDayDTO = workDayDTO;
+        }
     }
 }

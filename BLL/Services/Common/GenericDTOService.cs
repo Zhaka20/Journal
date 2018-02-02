@@ -92,7 +92,7 @@ namespace BLL.Services.Common
             return currentEntityRepository.SaveChangesAsync();
         }
 
-        public void Update(TEntityDTO dto)
+        public void UpdateMentorsBaseData(TEntityDTO dto)
         {
             if (dto == null)
             {

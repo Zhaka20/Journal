@@ -34,8 +34,8 @@ namespace Journal.AbstractDAL.AbstractRepositories.Common
                 params Expression<Func<TEntity, object>>[] includeProperties
                 );
 
-        TEntity GetSingleById(TKey id);
-        Task<TEntity> GetSingleByIdAsync(TKey id);
+        TEntity GetSingleById(TKey id, params Expression<Func<TEntity, object>>[] includeProperties);
+        Task<TEntity> GetSingleByIdAsync(TKey id, params Expression<Func<TEntity, object>>[] includeProperties);
         TEntity GetSingleById(params object[] keys);
         Task<TEntity> GetSingleByIdAsync(params object[] keys);
 

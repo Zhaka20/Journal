@@ -6,6 +6,11 @@ namespace Journal.WEB.ViewFactory.BuilderInputData.Controllers.Attendance
 {
     public class IndexPageData
     {
+        public IndexPageData(IEnumerable<AttendanceDTO> attendances)
+        {
+            Attendances = attendances;
+        }
+
         public IEnumerable<AttendanceDTO> Attendances { get; internal set; }
     }
 }

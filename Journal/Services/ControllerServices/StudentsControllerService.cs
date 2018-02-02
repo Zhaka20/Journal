@@ -9,6 +9,8 @@ using Journal.ViewModels.Controller.Students;
 using Journal.BLLtoUIData.DTOs;
 using Journal.ViewFactory.Abstractions;
 using Journal.WEB.ViewFactory.BuilderInputData.Controllers.Students;
+using Journal.DTOFactory.Abstractions;
+using Journal.DTOBuilderDataFactory.BuilderInputData;
 
 namespace Journal.Services.ControllerServices
 {
@@ -17,41 +19,29 @@ namespace Journal.Services.ControllerServices
         protected readonly IStudentDTOService studentService;
         protected readonly ApplicationUserManager userManager;
         protected readonly IViewFactory viewFactory;
+        protected readonly IDTOFactory dtoFactory;
 
-        public StudentsControllerService(IStudentDTOService studentService, ApplicationUserManager userManager, IViewFactory viewFactory)
+        public StudentsControllerService(IStudentDTOService studentService, ApplicationUserManager userManager, IViewFactory viewFactory, IDTOFactory dtoFactory)
         {
             this.studentService = studentService;
             this.userManager = userManager;
             this.viewFactory = viewFactory;
+            this.dtoFactory = dtoFactory;
         }
 
         public async Task<IndexViewModel> GetIndexViewModelAsync()
         {
             IEnumerable<StudentDTO> students = await studentService.GetAllAsync();
-            var pageData = new IndexPageData
-            {
-                Students = students
-            };
-
+            var pageData = new IndexPageData(students);
             IndexViewModel viewModel = viewFactory.CreateView<IndexPageData, IndexViewModel>(pageData);
             return viewModel;
         }
 
         public async Task<HomeViewModel> GetHomeViewModelAsync(string studentId)
         {
-            StudentDTO student = await studentService.GetFirstOrDefaultAsync(
-                                            s => s.Id == studentId,
-                                            s => s.Mentor,
-                                            s => s.Submissions.Select(sub => sub.Assignment.AssignmentFile),
-                                            s => s.Submissions.Select(sub => sub.SubmitFile)
-                                            );
+            StudentDTO student = await studentService.GetByIdAsyncWithMentorSubmissionsFilesAndAssignmentFile(studentId);
 
-            var pageData = new HomePageData
-            {
-                Student = student,
-                Submissions = student.Submissions
-            };
-
+            var pageData = new HomePageData(student);
             HomeViewModel viewModel = viewFactory.CreateView<HomePageData, HomeViewModel>(pageData);
             return viewModel;
         }
@@ -64,12 +54,9 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var pageData = new DetailsPageData
-            {
-                Student = student
-            };
-
-            DetailsViewModel viewModel = viewFactory.CreateView<DetailsPageData, DetailsViewModel>(pageData);
+            var viewModelData = new DetailsPageData(student);
+            
+            DetailsViewModel viewModel = viewFactory.CreateView<DetailsPageData, DetailsViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -81,7 +68,8 @@ namespace Journal.Services.ControllerServices
 
         public async Task<IdentityResult> CreateAsync(CreateViewModel viewModel)
         {
-            StudentDTO newStudent = viewModel.ToStudentModel();
+            StudentDTOBuilderData builderData = new StudentDTOBuilderData(viewModel);
+            StudentDTO newStudent = dtoFactory.CreateDTO<StudentDTOBuilderData, StudentDTO>(builderData);
 
             IdentityResult result = await userManager.CreateAsync(newStudent, viewModel.Password);
             if (result.Succeeded)
@@ -98,24 +86,16 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var pageData = new EditPageData
-            {
-                Student = student
-            };
+            var pageData = new EditPageData(student);
             EditViewModel viewModel = viewFactory.CreateView<EditPageData, EditViewModel>(pageData);
             return viewModel;
         }
 
         public async Task UpdateAsync(EditViewModel viewModel)
         {
-            StudentDTO newStudent = viewModel.ToStudentModel();
-            studentService.Update(newStudent,
-                           e => e.Email,
-                           e => e.UserName,
-                           e => e.FirstName,
-                           e => e.LastName,
-                           e => e.PhoneNumber
-                         );
+            StudentDTOBuilderData builderData = new StudentDTOBuilderData(viewModel);
+            StudentDTO newStudent = dtoFactory.CreateDTO<StudentDTOBuilderData, StudentDTO>(builderData);
+            studentService.UpdateStudentsBaseInfo(newStudent);
             await studentService.SaveChangesAsync();
         }
 
@@ -126,10 +106,7 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var pageData = new DeletePageData
-            {
-                Student = student
-            };
+            var pageData = new DeletePageData(student);
             DeleteViewModel viewModel = viewFactory.CreateView<DeletePageData, DeleteViewModel>(pageData);
             return viewModel;
         }

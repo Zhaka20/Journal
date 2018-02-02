@@ -9,5 +9,6 @@ namespace Journal.AbstractBLL.AbstractServices
         Task<MentorDTO> GetMentorByEmailAsync(string mentorEmail);
         Task AcceptStudentAsync(string studentId, string mentorId);
         Task RemoveStudentAsync(string studentId, string mentorId);
+        Task<MentorDTO> GetByIdWithStudentsAndAssignmentsAsync(string mentorId);
     }
 }

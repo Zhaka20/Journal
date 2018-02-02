@@ -12,6 +12,8 @@ using Journal.AbstractBLL.AbstractServices;
 using Journal.WEB.Services.Common;
 using Journal.ViewFactory.Abstractions;
 using Journal.WEB.ViewFactory.BuilderInputData.Controllers.WorkDays;
+using Journal.DTOBuilderDataFactory.BuilderInputData;
+using Journal.DTOFactory.Abstractions;
 
 namespace Journal.Services.ControllerServices
 {
@@ -22,18 +24,21 @@ namespace Journal.Services.ControllerServices
         protected readonly IAttendanceDTOService attendanceService;
         protected readonly IObjectToObjectMapper mapper;
         protected readonly IViewFactory viewModelFactory;
+        protected readonly IDTOFactory dtoFactory;
 
         public WorkDaysControllerService(IWorkDayDTOService workDayService,
                                          IStudentDTOService studentService,
                                          IAttendanceDTOService attendanceService,
                                          IObjectToObjectMapper mapper,
-                                         IViewFactory viewFactory)
+                                         IViewFactory viewFactory,
+                                         IDTOFactory dtoFactory)
         {
             this.attendanceService = attendanceService;
             this.studentService = studentService;
             this.workDayService = workDayService;
             this.mapper = mapper;
             this.viewModelFactory = viewFactory;
+            this.dtoFactory = dtoFactory;
         }
 
         public async Task<IndexViewModel> GetWorkDaysIndexViewModel()
@@ -41,30 +46,24 @@ namespace Journal.Services.ControllerServices
             IEnumerable<WorkDayDTO> workDayDTOs = await workDayService.GetAllAsync();
             IEnumerable<WorkDayViewModel> workDayViewModels = viewModelFactory.CreateView<IEnumerable<WorkDayDTO>, IEnumerable<WorkDayViewModel>>(workDayDTOs);
 
-            var viewModelBuilderData = new IndexPageData
-            {
-                WorkDays = workDayDTOs
-            };
-            IndexViewModel viewModel = viewModelFactory.CreateView<IndexPageData, IndexViewModel>(viewModelBuilderData);
+            var viewModelData = new IndexPageData(workDayDTOs);
+            IndexViewModel viewModel = viewModelFactory.CreateView<IndexPageData, IndexViewModel>(viewModelData);
             
             return viewModel;
         }
 
         public async Task<DetailsViewModel> GetWorkDayDetailsViewModelAsync(int workDayId)
         {
-            WorkDayDTO workDayDTO = await workDayService.GetFirstOrDefaultAsync(w => w.Id == workDayId, w => w.Attendances);
+            WorkDayDTO workDayDTO = await workDayService.GetWorkDayWithAttendeesByIdAsync(workDayId);
 
             if (workDayDTO == null)
             {
                 return null;
             }
 
-            var viewModelbuilderData = new DetailsPageData
-            {
-                WorkDay = workDayDTO
-            };
+            var viewModelData = new DetailsPageData(workDayDTO);
 
-            DetailsViewModel viewModel = viewModelFactory.CreateView<DetailsPageData, DetailsViewModel>(viewModelbuilderData);          
+            DetailsViewModel viewModel = viewModelFactory.CreateView<DetailsPageData, DetailsViewModel>(viewModelData);          
             return viewModel;
         }
 
@@ -76,11 +75,8 @@ namespace Journal.Services.ControllerServices
 
         public async Task<int> CreateWorkDayAsync(CreateViewModel inputModel)
         {
-            WorkDayDTO newWorkDay = new WorkDayDTO
-            {
-                JournalId = inputModel.JournalId,
-                Day = inputModel.Day
-            };
+            var builderData = new WorkDayDTOBuilderData(inputModel);
+            WorkDayDTO newWorkDay = dtoFactory.CreateDTO<WorkDayDTOBuilderData, WorkDayDTO>(builderData);
 
             workDayService.Create(newWorkDay);
             await workDayService.SaveChangesAsync();
@@ -94,23 +90,17 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            EditPageData viewModelbuilderData = new EditPageData
-            {
-                WorkDayToEdit = workDayDTO
-            };
-            EditViewModel viewModel = viewModelFactory.CreateView<EditPageData, EditViewModel>(viewModelbuilderData);                      
+            EditPageData viewModelData = new EditPageData(workDayDTO);
+        
+            EditViewModel viewModel = viewModelFactory.CreateView<EditPageData, EditViewModel>(viewModelData);                      
             return viewModel;
         }
 
         public async Task WorkDayUpdateAsync(EditViewModel inputModel)
         {
-            //WorkDayDTO updatedWorkDay = new WorkDayDTO
-            //{
-            //    Id = inputModel.WorkDayToEdit.Id,
-            //    Day = inputModel.WorkDayToEdit.Day
-            //};
-            WorkDayDTO updatedWorkDay = mapper.Map<WorkDayViewModel, WorkDayDTO>(inputModel.WorkDayToEdit);
-            workDayService.Update();
+            WorkDayDTOBuilderData builderData = new WorkDayDTOBuilderData(inputModel);
+            WorkDayDTO updatedWorkDay = dtoFactory.CreateDTO<WorkDayDTOBuilderData, WorkDayDTO>(builderData);
+            workDayService.UpdateDay(updatedWorkDay);
             await workDayService.SaveChangesAsync();
         }
 
@@ -121,11 +111,9 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var viewModelBuilderData = new DeletePageData
-            {
-                WorkDay = workDayDTO
-            };
-            var viewModel = viewModelFactory.CreateView<DeletePageData, DeleteViewModel>(viewModelBuilderData);
+            var viewModelData = new DeletePageData(workDayDTO);
+           
+            var viewModel = viewModelFactory.CreateView<DeletePageData, DeleteViewModel>(viewModelData);
 
             return viewModel;
         }
@@ -140,15 +128,9 @@ namespace Journal.Services.ControllerServices
         public async Task<AddAttendeesViewModel> GetAddAttendeesViewModelAsync(int workDayId)
         {
             string mentorId = HttpContext.Current.User.Identity.GetUserId();
-            //IQueryable<Student> mentorsAllStudents = db.Students.Where(s => s.MentorId == mentorId);
+            IEnumerable<StudentDTO> mentorsAllStudents = await studentService.GetByMentorId(mentorId);
 
-            IEnumerable<StudentDTO> mentorsAllStudents = await studentService.GetAllAsync(s => s.MentorId == mentorId);
-
-            //IQueryable<Student> presentStudents = from attendance in db.Attendances
-            //                      where attendance.WorkDayId == workDayId
-            //                      select attendance.Student;
-
-            IEnumerable<AttendanceDTO> attendances = await attendanceService.GetAllAsync(a => a.WorkDayId == workDayId);
+            IEnumerable<AttendanceDTO> attendances = await attendanceService.GetByWorkDayId(workDayId);
 
             List<StudentDTO> presentStudents = new List<StudentDTO>();
             foreach (var attendance in attendances)
@@ -156,14 +138,9 @@ namespace Journal.Services.ControllerServices
                 presentStudents.Add(attendance.Student);
             }
 
-            //List<Student> notPresentStudents = await mentorsAllStudents.Except(presentStudents).ToListAsync();
-
             IEnumerable<StudentDTO> notPresentStudents = mentorsAllStudents.Except(presentStudents);
-            var viewModelBuilderData = new AddAttendeesPageData
-            {
-                NotPresentStudents = notPresentStudents
-            };
-            var viewModel = viewModelFactory.CreateView<AddAttendeesPageData, AddAttendeesViewModel>(viewModelBuilderData);
+            var viewModelData = new AddAttendeesPageData(notPresentStudents);
+            var viewModel = viewModelFactory.CreateView<AddAttendeesPageData, AddAttendeesViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -172,16 +149,9 @@ namespace Journal.Services.ControllerServices
             if (attendeeIds != null)
             {
                 WorkDayDTO workDay = await workDayService.GetByIdAsync(workDayId);
+                            
+                IEnumerable<StudentDTO> students = await studentService.GetStudentsByIds(attendeeIds);
 
-                //IQueryable<Student> query = from student in db.Students
-                //            where attendeeIds.Contains(student.Id)
-                //            select student;
-
-                IEnumerable<StudentDTO> students = await studentService.GetAllAsync(s => attendeeIds.Contains(s.Id));
-                //List<Student> listOfStudents = await query.ToListAsync();
-
-
-                //WORKDAYSERVICE.ADDATTENDEESIMPLEMENT NEEDED
                 foreach (StudentDTO student in students)
                 {
                     workDay.Attendances.Add(new AttendanceDTO { Student = student, Come = DateTime.Now });
@@ -195,18 +165,8 @@ namespace Journal.Services.ControllerServices
             if (attendaceIds != null)
             {
                 WorkDayDTO workDay = await workDayService.GetByIdAsync(workDayId);
-                //WorkDay workDay = await db.WorkDays.FindAsync(workDayId);
-
-                //IQueryable<Attendance> query = from attenance in db.Attendances
-                //            where attendaceIds.Contains(attenance.Id)
-                //            select attenance;
-                //List<Attendance> listOfAttendees = await query.ToListAsync();
-                IEnumerable<AttendanceDTO> attendances = await attendanceService.GetAllAsync(a => attendaceIds.Contains(a.Id));
-
-                //foreach (Attendance attendee in listOfAttendees)
-                //{
-                //    attendee.Left = DateTime.Now;
-                //}
+              
+                IEnumerable<AttendanceDTO> attendances = await attendanceService.GetAttendeesByIds(attendaceIds);
 
                 foreach (AttendanceDTO attendee in attendances)
                 {
@@ -214,7 +174,6 @@ namespace Journal.Services.ControllerServices
                 }
 
                 await workDayService.SaveChangesAsync();
-                //await db.SaveChangesAsync();
             }
         }
 

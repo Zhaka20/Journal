@@ -6,6 +6,11 @@ namespace Journal.WEB.ViewFactory.BuilderInputData.Controllers.WorkDays
 {
     public class IndexPageData
     {
-        public IEnumerable<WorkDayDTO> WorkDays { get; set; }
+        private IEnumerable<WorkDayDTO> workDayDTOs;
+
+        public IndexPageData(IEnumerable<WorkDayDTO> workDayDTOs)
+        {
+            this.workDayDTOs = workDayDTOs;
+        }
     }
 }

@@ -8,6 +8,11 @@ namespace Journal.ViewFactory.BuilderInputData.Controllers.Submissions
 {
     public class SubmissionPageData
     {
+        public SubmissionPageData(SubmissionDTO submission)
+        {
+            Submission = submission;
+        }
+
         public SubmissionDTO Submission { get; set; }
     }
 }
