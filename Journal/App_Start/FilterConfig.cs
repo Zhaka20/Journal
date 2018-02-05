@@ -1,7 +1,7 @@
 ﻿using System.Web;
 using System.Web.Mvc;
 
-namespace Journal
+namespace Journal.App_Start
 {
     public class FilterConfig
     {

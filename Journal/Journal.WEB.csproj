@@ -167,6 +167,18 @@
     <Compile Include="App_Start\IdentityConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
+    <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\AdminController.cs" />
+    <Compile Include="Controllers\AssignmentsController.cs" />
+    <Compile Include="Controllers\AttendancesController.cs" />
+    <Compile Include="Controllers\CommentsController.cs" />
+    <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\JournalsController.cs" />
+    <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="Controllers\MentorsController.cs" />
+    <Compile Include="Controllers\StudentsController.cs" />
+    <Compile Include="Controllers\SubmissionsController.cs" />
+    <Compile Include="Controllers\WorkDaysController.cs" />
     <Compile Include="DTOFactory\Abstractions\IDTOBuilder.cs" />
     <Compile Include="DTOFactory\Abstractions\IDTOFactory.cs" />
     <Compile Include="DTOFactory\BuilderInputData\ApplicationUserDTOBuilderData.cs" />
@@ -413,7 +425,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Controllers\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
@@ -432,6 +443,14 @@
     <ProjectReference Include="..\BLLtoUIData\BLLtoUIData.csproj">
       <Project>{099B6E27-0497-4F60-A979-8294507DF11A}</Project>
       <Name>BLLtoUIData</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DAL\DAL.csproj">
+      <Project>{F56CF57B-8F7D-4DC8-B097-F737401E8778}</Project>
+      <Name>DAL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Journal.DataModel\Journal.DataModel.csproj">
+      <Project>{920A0295-FE78-470E-95C5-41CA9BBBA183}</Project>
+      <Name>Journal.DataModel</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

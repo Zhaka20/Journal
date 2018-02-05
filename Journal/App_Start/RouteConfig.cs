@@ -5,7 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace Journal
+namespace Journal.App_Start
 {
     public class RouteConfig
     {

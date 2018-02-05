@@ -7,7 +7,7 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
 
-namespace Journal
+namespace Journal.App_Start
 {
     public class EmailService : IIdentityMessageService
     {

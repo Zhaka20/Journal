@@ -48,15 +48,7 @@ namespace Journal.DAL.Repositories.Common
             GetQueryable(filter,orderBy,skip,take);
             return await query.ToListAsync();
         }
-
-        public virtual TEntity GetSingleById(TKey id)
-        {
-            return dbSet.Find(id);
-        }
-        public virtual Task<TEntity> GetSingleByIdAsync(TKey id)
-        {
-            return dbSet.FindAsync(id);
-        }
+     
         public virtual void Insert(TEntity entity)
         {
             if(entity == null)
@@ -65,20 +57,8 @@ namespace Journal.DAL.Repositories.Common
             }
             dbSet.Add(entity);
         }
-        public virtual void Update(TEntity entity)
-        {
-            if (entity == null)
-            {
-                throw new ArgumentNullException("entity argument cannot be null");
-            }
 
-            if (db.Entry(entity).State == EntityState.Detached)
-            {
-                dbSet.Attach(entity);
-            }
-            db.Entry(entity).State = EntityState.Modified;
-        }
-        public virtual void UpdateSelectedProperties(TEntity entity, params Expression<Func<TEntity, object>>[] updateProperties)
+        public virtual void Update(TEntity entity, params Expression<Func<TEntity, object>>[] updateProperties)
         {
             if (entity == null)
             {
@@ -115,22 +95,7 @@ namespace Journal.DAL.Repositories.Common
                 Delete(entity);
             }
         }
-        public virtual int GetCount(Expression<Func<TEntity, bool>> filter = null)
-        {
-            return GetQueryable(filter).Count();
-        }
-        public virtual Task<int> GetCountAsync(Expression<Func<TEntity, bool>> filter = null)
-        {
-            return GetQueryable(filter).CountAsync();
-        }
-        public virtual bool GetExists(Expression<Func<TEntity, bool>> filter = null)
-        {
-            return GetQueryable(filter).Any();
-        }
-        public virtual Task<bool> GetExistsAsync(Expression<Func<TEntity, bool>> filter = null)
-        {
-            return GetQueryable(filter).AnyAsync();
-        }
+       
         public virtual void SaveChanges()
         {
             db.SaveChanges();
@@ -140,7 +105,7 @@ namespace Journal.DAL.Repositories.Common
             return db.SaveChangesAsync();
         }
 
-        protected virtual IQueryable<TEntity> GetQueryable(
+        protected internal virtual IQueryable<TEntity> GetQueryable(
             Expression<Func<TEntity,
             bool>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
@@ -206,14 +171,14 @@ namespace Journal.DAL.Repositories.Common
             db.Dispose();
         }
 
-        public virtual TEntity GetSingleById(params object[] keys)
+        public TEntity GetSingleBy(TKey id)
         {
-            return dbSet.Find(keys);
+            return dbSet.Find(id);
         }
 
-        public virtual Task<TEntity> GetSingleByIdAsync(params object[] keys)
+        public Task<TEntity> GetSingleByIdAsync(TKey id)
         {
-            return dbSet.FindAsync(keys);
+            return dbSet.FindAsync(id);
         }
     }
 }

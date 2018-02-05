@@ -4,6 +4,8 @@ using Journal.AbstractDAL.AbstractRepositories.Common;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq.Expressions;
+using System.Linq;
 
 namespace BLL.Services.Common
 {
@@ -52,10 +54,14 @@ namespace BLL.Services.Common
             currentEntityRepository.Delete(entity);
         }
 
-        public IEnumerable<TEntityDTO> GetAll()
+
+        public IEnumerable<TEntityDTO> GetAll(Expression<Func<TEntityDTO, bool>> filter = null, 
+                                              Func<IQueryable<TEntityDTO>, IOrderedQueryable<TEntityDTO>> orderBy = null,
+                                              int? skip = null, int? take = null, 
+                                              params Expression<Func<TEntityDTO, object>>[] includeProperties)
         {
             IEnumerable<TEntityDTO> result = new List<TEntityDTO>();
-            var entities = currentEntityRepository.GetAll();
+            var entities = currentEntityRepository.GetAll(filter,orderBy,skip,take,includeProperties);
             if (entities == null)
             {
                 return result;
@@ -64,10 +70,13 @@ namespace BLL.Services.Common
             return result;
         }
 
-        public async Task<IEnumerable<TEntityDTO>> GetAllAsync()
+        public Task<IEnumerable<TEntityDTO>> GetAllAsync(Expression<Func<TEntityDTO, bool>> filter = null, 
+                                                         Func<IQueryable<TEntityDTO>, IOrderedQueryable<TEntityDTO>> orderBy = null,
+                                                         int? skip = null, int? take = null,
+                                                         params Expression<Func<TEntityDTO, object>>[] includeProperties)
         {
             IEnumerable<TEntityDTO> result = new List<TEntityDTO>();
-            var entities = await currentEntityRepository.GetAllAsync();
+            var entities = currentEntityRepository.GetAll(filter, orderBy, skip, take, includeProperties);
             if (entities == null)
             {
                 return result;
@@ -87,12 +96,22 @@ namespace BLL.Services.Common
             return result;
         }
 
+        public Task<TEntityDTO> GetByIdAsync(TKey id, params Expression<Func<TEntityDTO, object>>[] includedProperties)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task SaveChangesAsync()
         {
             return currentEntityRepository.SaveChangesAsync();
         }
 
-        public void UpdateMentorsBaseData(TEntityDTO dto)
+        public void Update(TEntityDTO dto, params Expression<Func<TEntityDTO, object>>[] includedProperties)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update(TEntityDTO dto, params Expression<Func<TEntity, object>>[] includedProperties)
         {
             if (dto == null)
             {
@@ -105,5 +124,7 @@ namespace BLL.Services.Common
             }
             currentEntityRepository.Update(entity);
         }
+
+        protected 
     }
 }

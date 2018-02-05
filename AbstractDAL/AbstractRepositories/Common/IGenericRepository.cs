@@ -24,6 +24,9 @@ namespace Journal.AbstractDAL.AbstractRepositories.Common
             params Expression<Func<TEntity, object>>[] includeProperties
             );
 
+        TEntity GetSingleBy(TKey id);
+        Task<TEntity> GetSingleByIdAsync(TKey id);
+
         TEntity GetFirstOrDefault(
                 Expression<Func<TEntity, bool>> filter = null,
                 params Expression<Func<TEntity, object>>[] includeProperties
@@ -33,21 +36,9 @@ namespace Journal.AbstractDAL.AbstractRepositories.Common
                 Expression<Func<TEntity, bool>> filter = null,
                 params Expression<Func<TEntity, object>>[] includeProperties
                 );
-
-        TEntity GetSingleById(TKey id, params Expression<Func<TEntity, object>>[] includeProperties);
-        Task<TEntity> GetSingleByIdAsync(TKey id, params Expression<Func<TEntity, object>>[] includeProperties);
-        TEntity GetSingleById(params object[] keys);
-        Task<TEntity> GetSingleByIdAsync(params object[] keys);
-
-        int GetCount(Expression<Func<TEntity, bool>> filter = null);
-        Task<int> GetCountAsync(Expression<Func<TEntity, bool>> filter = null);
-
-        bool GetExists(Expression<Func<TEntity, bool>> filter = null);
-        Task<bool> GetExistsAsync(Expression<Func<TEntity, bool>> filter = null);
-
+       
         void Insert(TEntity entity);
-        void Update(TEntity entity);
-        void UpdateSelectedProperties(TEntity entity, params Expression<Func<TEntity, object>>[] includeProperties);
+        void Update(TEntity entity, params Expression<Func<TEntity, object>>[] includeProperties);
 
         Task Delete(TKey id);
         void Delete(TEntity entity);
