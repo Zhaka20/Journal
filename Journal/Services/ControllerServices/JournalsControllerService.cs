@@ -48,7 +48,7 @@ namespace Journal.Services.ControllerServices
             await service.SaveChangesAsync();
         }
 
-        public async Task<IndexViewModel> GetJournalsIndexViewModelAsync()
+        public async Task<IndexViewModel> GetIndexViewModelAsync()
         {
             IEnumerable<JournalDTO> journals = await service.GetAllAsyncWithMentor();
             IndexViewData viewModelData = new IndexViewData(journals);
@@ -56,7 +56,7 @@ namespace Journal.Services.ControllerServices
             return viewModel;
         }
 
-        public async Task<DetailsViewModel> GetJournalDetailsViewModelAsync(int journalId)
+        public async Task<DetailsViewModel> GetDetailsViewModelAsync(int journalId)
         {
             JournalDTO journal = await service.GetByIdAsyncWithMentor(journalId);
 
@@ -73,13 +73,13 @@ namespace Journal.Services.ControllerServices
         {
             JournalDTOBuilderData builderData = new JournalDTOBuilderData(viewModel);
             JournalDTO newJournal = dtoFactory.CreateDTO<JournalDTOBuilderData, JournalDTO>(builderData);
-            
+
             service.Create(newJournal);
             await service.SaveChangesAsync();
             return newJournal.Id;
         }
 
-        public async Task<EditViewModel> GetEditJournalViewModelAsync(int journalId)
+        public async Task<EditViewModel> GetEditViewModelAsync(int journalId)
         {
             JournalDTO journal = await service.GetByIdAsyncWithMentor(journalId);
             if (journal == null)
@@ -100,7 +100,7 @@ namespace Journal.Services.ControllerServices
             await service.SaveChangesAsync();
         }
 
-        public async Task<DeleteViewModel> GetDeleteJournalViewModelAsync(int journalId)
+        public async Task<DeleteViewModel> GetDeleteViewModelAsync(int journalId)
         {
             JournalDTO journal = await service.GetByIdAsync(journalId);
             if (journal == null)
@@ -128,16 +128,17 @@ namespace Journal.Services.ControllerServices
             }
         }
 
-        WorkDaysCreateViewModel GetCreateWorkDayViewModel(int journalId)
+        WorkDaysCreateViewModel IJournalsControllerService.GetCreateWorkDayViewModel(int journalId)
         {
             var viewModel = viewFactory.CreateView<WorkDaysCreateViewModel>();
             return viewModel;
         }
 
-        CreateViewModel GetCreateJournalViewModel(string mentorId)
+        CreateViewModel IJournalsControllerService.GetCreateViewModel(string mentorId)
         {
             var viewModel = viewFactory.CreateView<CreateViewModel>();
             return viewModel;
         }
+
     }
 }

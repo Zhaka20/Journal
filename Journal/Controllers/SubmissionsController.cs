@@ -33,7 +33,7 @@ namespace Journal.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            AssignmentViewModel viewModel = await _service.GetAssignmentSubmissionsViewModelAsync((int)id);
+            var viewModel = await _service.GetAssignmentSubmissionsViewModelAsync((int)id);
             if(viewModel == null)
             {
                 return HttpNotFound();

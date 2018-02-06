@@ -55,13 +55,13 @@ namespace BLL.Services.Common
         }
 
 
-        public IEnumerable<TEntityDTO> GetAll(Expression<Func<TEntityDTO, bool>> filter = null, 
+        public IEnumerable<TEntityDTO> GetAll(Expression<Func<TEntityDTO, bool>> filter = null,
                                               Func<IQueryable<TEntityDTO>, IOrderedQueryable<TEntityDTO>> orderBy = null,
-                                              int? skip = null, int? take = null, 
+                                              int? skip = null, int? take = null,
                                               params Expression<Func<TEntityDTO, object>>[] includeProperties)
         {
             IEnumerable<TEntityDTO> result = new List<TEntityDTO>();
-            var entities = currentEntityRepository.GetAll(filter,orderBy,skip,take,includeProperties);
+            var entities = currentEntityRepository.GetAll(filter, orderBy, skip, take, includeProperties);
             if (entities == null)
             {
                 return result;
@@ -70,7 +70,7 @@ namespace BLL.Services.Common
             return result;
         }
 
-        public Task<IEnumerable<TEntityDTO>> GetAllAsync(Expression<Func<TEntityDTO, bool>> filter = null, 
+        public Task<IEnumerable<TEntityDTO>> GetAllAsync(Expression<Func<TEntityDTO, bool>> filter = null,
                                                          Func<IQueryable<TEntityDTO>, IOrderedQueryable<TEntityDTO>> orderBy = null,
                                                          int? skip = null, int? take = null,
                                                          params Expression<Func<TEntityDTO, object>>[] includeProperties)
@@ -124,7 +124,5 @@ namespace BLL.Services.Common
             }
             currentEntityRepository.Update(entity);
         }
-
-        protected 
     }
 }

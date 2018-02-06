@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Journal.App_Start;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;

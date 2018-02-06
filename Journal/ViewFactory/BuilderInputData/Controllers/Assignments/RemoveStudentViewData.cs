@@ -1,5 +1,4 @@
 ﻿using Journal.BLLtoUIData.DTOs;
-using Journal.ViewDatas.Shared.EntityViewDatas;
 
 namespace Journal.WEB.ViewFactory.BuilderInputData.Controllers.Assignments
 {

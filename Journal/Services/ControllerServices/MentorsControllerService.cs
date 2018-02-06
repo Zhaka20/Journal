@@ -12,6 +12,7 @@ using Journal.ViewFactory.Abstractions;
 using Journal.WEB.ViewFactory.BuilderInputData.Controllers.Mentors;
 using Journal.DTOFactory.Abstractions;
 using Journal.DTOBuilderDataFactory.BuilderInputData;
+using Journal.App_Start;
 
 namespace Journal.Services.ControllerServices
 {
@@ -143,7 +144,7 @@ namespace Journal.Services.ControllerServices
         {
             MentorDTOBuilderData builderData = new MentorDTOBuilderData(viewModel);
             MentorDTO newMentor = dtoFactory.CreateDTO<MentorDTOBuilderData, MentorDTO>(builderData);
-            mentorService.UpdateMentorsBaseData(newMentor);
+            mentorService.Update(newMentor);
             await mentorService.SaveChangesAsync();
         }
 

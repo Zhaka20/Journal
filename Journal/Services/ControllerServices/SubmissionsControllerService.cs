@@ -263,6 +263,7 @@ namespace Journal.Services.ControllerServices
             var viewModel = viewFactory.CreateView<SubmissionViewData, SubmissionViewModel>(viewModelData);
             return viewModel;
         }
+
     }
 
     public class FileStreamWithInfo : IFileStreamWithInfo

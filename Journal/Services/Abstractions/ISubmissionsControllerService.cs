@@ -10,7 +10,7 @@ namespace Journal.Services.Abstractions
     public interface ISubmissionsControllerService : IDisposable
     {
         Task<IndexViewModel> GetIndexViewModelAsync();
-        Task<AssignmentViewModel> GetAssignmentSubmissionsViewModelAsync(int assignmentId);
+        Task<AssignmentSubmissionsViewModel> GetAssignmentSubmissionsViewModelAsync(int assignmentId);
         Task<DetailsViewModel> GetDetailsViewModelAsync(int assignmentId, string studentId);
         Task<EditViewModel> GetEditViewModelAsync(int assignmentId, string studentId);
         Task UpdateAsync(EditViewModel viewModel);
