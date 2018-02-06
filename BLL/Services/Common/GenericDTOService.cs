@@ -14,16 +14,16 @@ namespace BLL.Services.Common
     {
         protected readonly IGenericRepository<TEntity, TKey> currentEntityRepository;
         protected readonly IObjectToObjectMapper mapper;
-        protected readonly IExpressionMapper<TEntityDTO, TEntity> expressionMapper;
+        protected readonly IQueryExpressionBuilder<TEntityDTO, TEntity> expressionBuilder;
 
         public GenericDTOService(IGenericRepository<TEntity, TKey> repository,
                                  IObjectToObjectMapper mapper,
-                                 IExpressionMapper<TEntityDTO,TEntity> expressionMapper
+                                 IQueryExpressionBuilder<TEntityDTO,TEntity> expressionBuilder
                                 )
         {            
             this.currentEntityRepository = repository;
             this.mapper = mapper;
-            this.expressionMapper = expressionMapper;
+            this.expressionBuilder = expressionBuilder;
         }
 
         public void Create(TEntityDTO dto)
@@ -67,11 +67,11 @@ namespace BLL.Services.Common
                                               params Expression<Func<TEntityDTO, object>>[] includeProperties)
         {
             IEnumerable<TEntityDTO> result = new List<TEntityDTO>();
-            var mappedFilter = expressionMapper.Map(filter);
-            var mappedOrderExpression = expressionMapper.Map(orderBy);
-            var mappedIncludeProperties = 
+            var filterEpression = expressionBuilder.GetFilterExpression(filter);
+            var orderByExpression = expressionBuilder.GetOrderByExpression(orderBy);
+            var IncludePropertiesExpression = expressionBuilder.GetIncludePropertyExpressions(includeProperties);
 
-            var entities = currentEntityRepository.GetAll(filter, orderBy, skip, take, includeProperties);
+            var entities = currentEntityRepository.GetAll(filterEpression, orderByExpression, skip, take, includeProperties);
             if (entities == null)
             {
                 return result;

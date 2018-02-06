@@ -10,8 +10,9 @@ namespace BLL.Services.QueryMapper
 {
     public interface IQueryExpressionBuilder<TEntityDTO,TEntity>
     {
-        Expression<Func<TEntity, TResult>> GetFilter<TReturn,TResult>(Expression<Func<TEntityDTO, TReturn>> expression);
-        Expression<Func<TEntity, TResult>> GetOrderByExpression<TReturn,TResult>(Expression<Func<TEntityDTO, SortDirection, TReturn>> expression);
-        Expression<Func<TEntity, object>> GetIncludePropertyExpressions(Expression<Func<TEntityDTO, object>>[] includeProperties);
+        Expression<Func<TEntity, bool>> GetFilterExpression(Expression<Func<TEntityDTO, bool>> expression);
+        //Expression<Func<TEntity, TResult>> GetOrderByExpression<TParamReturn,TResult>(Expression<Func<TEntityDTO, SortDirection, TParamReturn>> expression);
+        Expression<Func<TEntity, object>> GetOrderByExpression(Expression<Func<TEntityDTO, SortDirection, object>> expression);
+        Expression<Func<TEntity, object>>[] GetIncludePropertyExpressions(Expression<Func<TEntityDTO, object>>[] includeProperties);
     }
 }
