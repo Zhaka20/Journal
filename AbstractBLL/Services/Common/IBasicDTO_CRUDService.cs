@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
@@ -10,7 +9,7 @@ namespace Journal.AbstractBLL.AbstractServices.Common
     {
         IEnumerable<TEntity> GetAll(
              Expression<Func<TEntity, bool>> filter = null,
-             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
+             Expression<Func<TEntity, SortDirection, object>> orderBy = null,
              int? skip = null,
              int? take = null,
              params Expression<Func<TEntity, object>>[] includeProperties
@@ -18,7 +17,7 @@ namespace Journal.AbstractBLL.AbstractServices.Common
 
         Task<IEnumerable<TEntity>> GetAllAsync(
             Expression<Func<TEntity, bool>> filter = null,
-            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
+            Expression<Func<TEntity, SortDirection, object>> orderBy = null,
             int? skip = null,
             int? take = null,
             params Expression<Func<TEntity, object>>[] includeProperties
@@ -30,6 +29,10 @@ namespace Journal.AbstractBLL.AbstractServices.Common
         void Delete(TEntity dto);
         Task DeleteByIdAsync(TKey id);
         Task SaveChangesAsync();
-
+    }
+    public enum SortDirection
+    {
+        Ascending = 0,
+        Descending = 1
     }
 }

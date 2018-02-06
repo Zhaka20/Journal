@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq.Expressions;
 using System.Linq;
+using BLL.Services.QueryMapper;
 
 namespace BLL.Services.Common
 {
@@ -13,11 +14,16 @@ namespace BLL.Services.Common
     {
         protected readonly IGenericRepository<TEntity, TKey> currentEntityRepository;
         protected readonly IObjectToObjectMapper mapper;
+        protected readonly IExpressionMapper<TEntityDTO, TEntity> expressionMapper;
 
-        public GenericDTOService(IGenericRepository<TEntity, TKey> repository, IObjectToObjectMapper mapper)
-        {
+        public GenericDTOService(IGenericRepository<TEntity, TKey> repository,
+                                 IObjectToObjectMapper mapper,
+                                 IExpressionMapper<TEntityDTO,TEntity> expressionMapper
+                                )
+        {            
             this.currentEntityRepository = repository;
             this.mapper = mapper;
+            this.expressionMapper = expressionMapper;
         }
 
         public void Create(TEntityDTO dto)
@@ -56,11 +62,15 @@ namespace BLL.Services.Common
 
 
         public IEnumerable<TEntityDTO> GetAll(Expression<Func<TEntityDTO, bool>> filter = null,
-                                              Func<IQueryable<TEntityDTO>, IOrderedQueryable<TEntityDTO>> orderBy = null,
+                                              Expression<Func<TEntityDTO, SortDirection, object>> orderBy = null,
                                               int? skip = null, int? take = null,
                                               params Expression<Func<TEntityDTO, object>>[] includeProperties)
         {
             IEnumerable<TEntityDTO> result = new List<TEntityDTO>();
+            var mappedFilter = expressionMapper.Map(filter);
+            var mappedOrderExpression = expressionMapper.Map(orderBy);
+            var mappedIncludeProperties = 
+
             var entities = currentEntityRepository.GetAll(filter, orderBy, skip, take, includeProperties);
             if (entities == null)
             {
@@ -71,7 +81,7 @@ namespace BLL.Services.Common
         }
 
         public Task<IEnumerable<TEntityDTO>> GetAllAsync(Expression<Func<TEntityDTO, bool>> filter = null,
-                                                         Func<IQueryable<TEntityDTO>, IOrderedQueryable<TEntityDTO>> orderBy = null,
+                                                         Expression<Func<TEntityDTO, SortDirection, object>> orderBy = null,
                                                          int? skip = null, int? take = null,
                                                          params Expression<Func<TEntityDTO, object>>[] includeProperties)
         {

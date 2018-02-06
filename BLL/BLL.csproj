@@ -66,6 +66,7 @@
     <Compile Include="Services\Common\GenericDTOService.cs" />
     <Compile Include="Services\JournalDTOService.cs" />
     <Compile Include="Services\MentorDTOService.cs" />
+    <Compile Include="Services\QueryMapper\IExpressionMapper.cs" />
     <Compile Include="Services\StudentDTOService.cs" />
     <Compile Include="Services\SubmissionDTOService.cs" />
     <Compile Include="Services\SubmitFileDTOService.cs" />
