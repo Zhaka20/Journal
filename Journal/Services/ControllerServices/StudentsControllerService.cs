@@ -32,8 +32,8 @@ namespace Journal.Services.ControllerServices
         public async Task<IndexViewModel> GetIndexViewModelAsync()
         {
             IEnumerable<StudentDTO> students = await studentService.GetAllAsync();
-            var pageData = new IndexPageData(students);
-            IndexViewModel viewModel = viewFactory.CreateView<IndexPageData, IndexViewModel>(pageData);
+            var pageData = new IndexViewData(students);
+            IndexViewModel viewModel = viewFactory.CreateView<IndexViewData, IndexViewModel>(pageData);
             return viewModel;
         }
 
@@ -41,8 +41,8 @@ namespace Journal.Services.ControllerServices
         {
             StudentDTO student = await studentService.GetByIdAsyncWithMentorSubmissionsFilesAndAssignmentFile(studentId);
 
-            var pageData = new HomePageData(student);
-            HomeViewModel viewModel = viewFactory.CreateView<HomePageData, HomeViewModel>(pageData);
+            var pageData = new HomeViewData(student);
+            HomeViewModel viewModel = viewFactory.CreateView<HomeViewData, HomeViewModel>(pageData);
             return viewModel;
         }
 
@@ -54,9 +54,9 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var viewModelData = new DetailsPageData(student);
+            var viewModelData = new DetailsViewData(student);
             
-            DetailsViewModel viewModel = viewFactory.CreateView<DetailsPageData, DetailsViewModel>(viewModelData);
+            DetailsViewModel viewModel = viewFactory.CreateView<DetailsViewData, DetailsViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -86,8 +86,8 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var pageData = new EditPageData(student);
-            EditViewModel viewModel = viewFactory.CreateView<EditPageData, EditViewModel>(pageData);
+            var pageData = new EditViewData(student);
+            EditViewModel viewModel = viewFactory.CreateView<EditViewData, EditViewModel>(pageData);
             return viewModel;
         }
 
@@ -106,8 +106,8 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var pageData = new DeletePageData(student);
-            DeleteViewModel viewModel = viewFactory.CreateView<DeletePageData, DeleteViewModel>(pageData);
+            var pageData = new DeleteViewData(student);
+            DeleteViewModel viewModel = viewFactory.CreateView<DeleteViewData, DeleteViewModel>(pageData);
             return viewModel;
         }
 

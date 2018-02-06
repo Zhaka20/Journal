@@ -28,8 +28,8 @@ namespace Journal.Services.ControllerServices
         public async Task<IndexViewModel> GetAttendancesIndexViewModelAsync()
         {
             IEnumerable<AttendanceDTO> attendances = await attendanceService.GetAllAsyncWithDayAndStudents();
-            var viewModelData = new IndexPageData(attendances);
-            IndexViewModel viewModel = viewFactory.CreateView<IndexPageData,IndexViewModel>(viewModelData);
+            var viewModelData = new IndexViewData(attendances);
+            IndexViewModel viewModel = viewFactory.CreateView<IndexViewData,IndexViewModel>(viewModelData);
             return viewModel;
         }
         public async Task<DetailsViewModel> GetAttendancesDetailsViewModelAsync(int attendanceId)
@@ -39,8 +39,8 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            DetailsPageData viewModelData = new DetailsPageData(attendance);
-            DetailsViewModel viewModel = viewFactory.CreateView<DetailsPageData, DetailsViewModel>(viewModelData);
+            DetailsViewData viewModelData = new DetailsViewData(attendance);
+            DetailsViewModel viewModel = viewFactory.CreateView<DetailsViewData, DetailsViewModel>(viewModelData);
             return viewModel;
         }
         public async Task<EditViewModel> GetEditAttendanceViewModelAsync(int attendanceId)
@@ -50,8 +50,8 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            EditPageData viewModelData = new EditPageData(attendance);
-            EditViewModel viewModel = viewFactory.CreateView<EditPageData, EditViewModel>(viewModelData);
+            EditViewData viewModelData = new EditViewData(attendance);
+            EditViewModel viewModel = viewFactory.CreateView<EditViewData, EditViewModel>(viewModelData);
             return viewModel;
         }
         public async Task UpdateAsync(EditViewModel inputModel)
@@ -68,8 +68,8 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            DeletePageData viewModelData = new DeletePageData(attendance);
-            DeleteViewModel viewModel = viewFactory.CreateView<DeletePageData, DeleteViewModel>(viewModelData);
+            DeleteViewData viewModelData = new DeleteViewData(attendance);
+            DeleteViewModel viewModel = viewFactory.CreateView<DeleteViewData, DeleteViewModel>(viewModelData);
             return viewModel;
         }
         public async Task DeleteAsync(DeleteInputModel inputModel)

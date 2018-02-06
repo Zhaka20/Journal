@@ -41,8 +41,8 @@ namespace Journal.Services.ControllerServices
         {
             IEnumerable<SubmissionDTO> submissions = await service.GetAllWithStudentAssignmentSubmitFileAsync();
 
-            var viewModelData = new IndexPageData(submissions);
-            IndexViewModel viewModel = viewFactory.CreateView<IndexPageData, IndexViewModel>(viewModelData);
+            var viewModelData = new IndexViewData(submissions);
+            IndexViewModel viewModel = viewFactory.CreateView<IndexViewData, IndexViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -55,9 +55,9 @@ namespace Journal.Services.ControllerServices
                 return null;
             }
 
-            var viewModelData = new AssignmentSubmissionsPageData(assignment);
+            var viewModelData = new AssignmentSubmissionsViewData(assignment);
             
-            var viewModel = viewFactory.CreateView<AssignmentSubmissionsPageData, AssignmentSubmissionsViewModel>(viewModelData);
+            var viewModel = viewFactory.CreateView<AssignmentSubmissionsViewData, AssignmentSubmissionsViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -68,9 +68,9 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var viewModelData = new DetailsPageData(submission);
+            var viewModelData = new DetailsViewData(submission);
             
-            var viewModel = viewFactory.CreateView<DetailsPageData, DetailsViewModel>(viewModelData);
+            var viewModel = viewFactory.CreateView<DetailsViewData, DetailsViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -82,8 +82,8 @@ namespace Journal.Services.ControllerServices
                 return null;
             }
 
-            var viewModelData = new EditPageData(submission);
-            var viewModel = viewFactory.CreateView<EditPageData, EditViewModel>(viewModelData);
+            var viewModelData = new EditViewData(submission);
+            var viewModel = viewFactory.CreateView<EditViewData, EditViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -103,9 +103,9 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var viewModelData = new DeletePageData(submission);
+            var viewModelData = new DeleteViewData(submission);
 
-            DeleteViewModel viewModel = viewFactory.CreateView<DeletePageData, DeleteViewModel>(viewModelData);
+            DeleteViewModel viewModel = viewFactory.CreateView<DeleteViewData, DeleteViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -168,8 +168,8 @@ namespace Journal.Services.ControllerServices
                 return null;
             }
 
-            var viewModelData = new EvaluatePageData(assignmentId, studentId, submission);
-            EvaluateViewModel viewModel = viewFactory.CreateView<EvaluatePageData, EvaluateViewModel>(viewModelData);
+            var viewModelData = new EvaluateViewData(assignmentId, studentId, submission);
+            EvaluateViewModel viewModel = viewFactory.CreateView<EvaluateViewData, EvaluateViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -258,9 +258,9 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var viewModelData = new SubmissionPageData(submission);
+            var viewModelData = new SubmissionViewData(submission);
 
-            var viewModel = viewFactory.CreateView<SubmissionPageData, SubmissionViewModel>(viewModelData);
+            var viewModel = viewFactory.CreateView<SubmissionViewData, SubmissionViewModel>(viewModelData);
             return viewModel;
         }
     }

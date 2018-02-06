@@ -36,16 +36,16 @@ namespace Journal.Services.ControllerServices
         {
             MentorDTO mentor = await mentorService.GetByIdWithStudentsAndAssignmentsAsync(mentorId);
 
-            var viewModelData = new HomePageData(mentor);
-            MentorsHomeViewModel viewModel = viewFactory.CreateView<HomePageData, MentorsHomeViewModel>(viewModelData);
+            var viewModelData = new HomeViewData(mentor);
+            MentorsHomeViewModel viewModel = viewFactory.CreateView<HomeViewData, MentorsHomeViewModel>(viewModelData);
             return viewModel;
         }
 
         public async Task<MentorsListViewModel> GetMentorsListViewModelAsync()
         {
             var mentors = await mentorService.GetAllAsync();
-            MentorsListPageData viewModelData = new MentorsListPageData(mentors);
-            MentorsListViewModel viewModel = viewFactory.CreateView<MentorsListPageData, MentorsListViewModel>(viewModelData);
+            MentorsListViewData viewModelData = new MentorsListViewData(mentors);
+            MentorsListViewModel viewModel = viewFactory.CreateView<MentorsListViewData, MentorsListViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -56,16 +56,16 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var viewModelData = new DetailsPageData(mentor);
-            DetailsViewModel viewModel = viewFactory.CreateView<DetailsPageData, DetailsViewModel>(viewModelData);
+            var viewModelData = new DetailsViewData(mentor);
+            DetailsViewModel viewModel = viewFactory.CreateView<DetailsViewData, DetailsViewModel>(viewModelData);
             return viewModel;
         }
 
         public async Task<AcceptStudentViewModel> GetAcceptStudentViewModelAsync(string mentorId)
         {
             IEnumerable<StudentDTO> students = await studentService.GetNotMyStudents(mentorId);
-            var viewModelData = new AcceptStudentPageData(students);
-            AcceptStudentViewModel viewModel = viewFactory.CreateView<AcceptStudentPageData, AcceptStudentViewModel>(viewModelData);
+            var viewModelData = new AcceptStudentViewData(students);
+            AcceptStudentViewModel viewModel = viewFactory.CreateView<AcceptStudentViewData, AcceptStudentViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -82,9 +82,9 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var viewModelData = new ExpelStudentPageData(student);
+            var viewModelData = new ExpelStudentViewData(student);
 
-            ExpelStudentViewModel viewModel = viewFactory.CreateView<ExpelStudentPageData, ExpelStudentViewModel>(viewModelData);
+            ExpelStudentViewModel viewModel = viewFactory.CreateView<ExpelStudentViewData, ExpelStudentViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -103,8 +103,8 @@ namespace Journal.Services.ControllerServices
                 return null;
             }
 
-            var viewModelData = new MyStudentPageData(student);
-            MyStudentViewModel viewModel = viewFactory.CreateView<MyStudentPageData, MyStudentViewModel>(viewModelData);
+            var viewModelData = new MyStudentViewData(student);
+            MyStudentViewModel viewModel = viewFactory.CreateView<MyStudentViewData, MyStudentViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -134,8 +134,8 @@ namespace Journal.Services.ControllerServices
                 return null;
             }
 
-            var viewModelData = new EditPageData(mentor);
-            EditViewModel viewModel = viewFactory.CreateView<EditPageData, EditViewModel>(viewModelData);
+            var viewModelData = new EditViewData(mentor);
+            EditViewModel viewModel = viewFactory.CreateView<EditViewData, EditViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -154,8 +154,8 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var viewModelData = new DeletePageData(mentor);
-            DeleteViewModel viewModel = viewFactory.CreateView<DeletePageData, DeleteViewModel>(viewModelData);
+            var viewModelData = new DeleteViewData(mentor);
+            DeleteViewModel viewModel = viewFactory.CreateView<DeleteViewData, DeleteViewModel>(viewModelData);
             return viewModel;
         }
 

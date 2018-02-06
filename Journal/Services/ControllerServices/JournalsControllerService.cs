@@ -33,8 +33,8 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var viewModelData = new FillPageData(journal);
-            FillViewModel viewModel = viewFactory.CreateView<FillPageData,FillViewModel>(viewModelData);
+            var viewModelData = new FillViewData(journal);
+            FillViewModel viewModel = viewFactory.CreateView<FillViewData,FillViewModel>(viewModelData);
 
             return viewModel;
         }
@@ -51,8 +51,8 @@ namespace Journal.Services.ControllerServices
         public async Task<IndexViewModel> GetJournalsIndexViewModelAsync()
         {
             IEnumerable<JournalDTO> journals = await service.GetAllAsyncWithMentor();
-            IndexPageData viewModelData = new IndexPageData(journals);
-            IndexViewModel viewModel = viewFactory.CreateView<IndexPageData, IndexViewModel>(viewModelData);
+            IndexViewData viewModelData = new IndexViewData(journals);
+            IndexViewModel viewModel = viewFactory.CreateView<IndexViewData, IndexViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -64,8 +64,8 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var viewModelData = new DetailsPageData(journal);
-            DetailsViewModel viewModel = viewFactory.CreateView<DetailsPageData, DetailsViewModel>(viewModelData);
+            var viewModelData = new DetailsViewData(journal);
+            DetailsViewModel viewModel = viewFactory.CreateView<DetailsViewData, DetailsViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -87,8 +87,8 @@ namespace Journal.Services.ControllerServices
                 return null;
             }
 
-            EditPageData viewModelData = new EditPageData(journal);
-            EditViewModel viewModel = viewFactory.CreateView<EditPageData, EditViewModel>(viewModelData);
+            EditViewData viewModelData = new EditViewData(journal);
+            EditViewModel viewModel = viewFactory.CreateView<EditViewData, EditViewModel>(viewModelData);
             return viewModel;
         }
 
@@ -107,8 +107,8 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            DeletePageData viewModelData = new DeletePageData(journal);
-            DeleteViewModel viewModel = viewFactory.CreateView<DeletePageData, DeleteViewModel>(viewModelData);
+            DeleteViewData viewModelData = new DeleteViewData(journal);
+            DeleteViewModel viewModel = viewFactory.CreateView<DeleteViewData, DeleteViewModel>(viewModelData);
             return viewModel;
         }
 

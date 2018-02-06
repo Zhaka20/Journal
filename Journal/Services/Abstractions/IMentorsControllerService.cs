@@ -12,7 +12,7 @@ namespace Journal.Services.Abstractions
         Task<DetailsViewModel> GetDetailsViewModelAsync(string mentorId);
         Task<AcceptStudentViewModel> GetAcceptStudentViewModelAsync(string mentorId);
         Task AcceptStudentAsync(string studentId,string mentorId);
-        Task<ExpelStudentPageData> GetExpelStudentViewModelAsync(string studentId);
+        Task<ExpelStudentViewData> GetExpelStudentViewModelAsync(string studentId);
         Task RemoveStudentAsync(string studentId,string mentorId);
         Task<MyStudentViewModel> GetStudentViewModelAsync(string id);
         CreateViewModel GetCreateMentorViewModel();

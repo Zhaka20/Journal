@@ -46,8 +46,8 @@ namespace Journal.Services.ControllerServices
             IEnumerable<WorkDayDTO> workDayDTOs = await workDayService.GetAllAsync();
             IEnumerable<WorkDayViewModel> workDayViewModels = viewModelFactory.CreateView<IEnumerable<WorkDayDTO>, IEnumerable<WorkDayViewModel>>(workDayDTOs);
 
-            var viewModelData = new IndexPageData(workDayDTOs);
-            IndexViewModel viewModel = viewModelFactory.CreateView<IndexPageData, IndexViewModel>(viewModelData);
+            var viewModelData = new IndexViewData(workDayDTOs);
+            IndexViewModel viewModel = viewModelFactory.CreateView<IndexViewData, IndexViewModel>(viewModelData);
             
             return viewModel;
         }
@@ -61,9 +61,9 @@ namespace Journal.Services.ControllerServices
                 return null;
             }
 
-            var viewModelData = new DetailsPageData(workDayDTO);
+            var viewModelData = new DetailsViewData(workDayDTO);
 
-            DetailsViewModel viewModel = viewModelFactory.CreateView<DetailsPageData, DetailsViewModel>(viewModelData);          
+            DetailsViewModel viewModel = viewModelFactory.CreateView<DetailsViewData, DetailsViewModel>(viewModelData);          
             return viewModel;
         }
 
@@ -90,9 +90,9 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            EditPageData viewModelData = new EditPageData(workDayDTO);
+            EditViewData viewModelData = new EditViewData(workDayDTO);
         
-            EditViewModel viewModel = viewModelFactory.CreateView<EditPageData, EditViewModel>(viewModelData);                      
+            EditViewModel viewModel = viewModelFactory.CreateView<EditViewData, EditViewModel>(viewModelData);                      
             return viewModel;
         }
 
@@ -111,9 +111,9 @@ namespace Journal.Services.ControllerServices
             {
                 return null;
             }
-            var viewModelData = new DeletePageData(workDayDTO);
+            var viewModelData = new DeleteViewData(workDayDTO);
            
-            var viewModel = viewModelFactory.CreateView<DeletePageData, DeleteViewModel>(viewModelData);
+            var viewModel = viewModelFactory.CreateView<DeleteViewData, DeleteViewModel>(viewModelData);
 
             return viewModel;
         }
@@ -139,8 +139,8 @@ namespace Journal.Services.ControllerServices
             }
 
             IEnumerable<StudentDTO> notPresentStudents = mentorsAllStudents.Except(presentStudents);
-            var viewModelData = new AddAttendeesPageData(notPresentStudents);
-            var viewModel = viewModelFactory.CreateView<AddAttendeesPageData, AddAttendeesViewModel>(viewModelData);
+            var viewModelData = new AddAttendeesViewData(notPresentStudents);
+            var viewModel = viewModelFactory.CreateView<AddAttendeesViewData, AddAttendeesViewModel>(viewModelData);
             return viewModel;
         }
 
