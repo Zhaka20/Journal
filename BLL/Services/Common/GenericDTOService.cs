@@ -70,8 +70,8 @@ namespace BLL.Services.Common
             var filterEpression = expressionBuilder.GetFilterExpression(filter);
             var orderByExpression = expressionBuilder.GetOrderByExpression(orderBy);
             var IncludePropertiesExpression = expressionBuilder.GetIncludePropertyExpressions(includeProperties);
+            var entities = currentEntityRepository.GetAll(filterEpression, orderByExpression, skip, take, IncludePropertiesExpression);
 
-            var entities = currentEntityRepository.GetAll(filterEpression, orderByExpression, skip, take, includeProperties);
             if (entities == null)
             {
                 return result;
@@ -80,13 +80,17 @@ namespace BLL.Services.Common
             return result;
         }
 
-        public Task<IEnumerable<TEntityDTO>> GetAllAsync(Expression<Func<TEntityDTO, bool>> filter = null,
+        public async Task<IEnumerable<TEntityDTO>> GetAllAsync(Expression<Func<TEntityDTO, bool>> filter = null,
                                                          Expression<Func<TEntityDTO, SortDirection, object>> orderBy = null,
                                                          int? skip = null, int? take = null,
                                                          params Expression<Func<TEntityDTO, object>>[] includeProperties)
         {
             IEnumerable<TEntityDTO> result = new List<TEntityDTO>();
-            var entities = currentEntityRepository.GetAll(filter, orderBy, skip, take, includeProperties);
+            var filterEpression = expressionBuilder.GetFilterExpression(filter);
+            var orderByExpression = expressionBuilder.GetOrderByExpression(orderBy);
+            var IncludePropertiesExpression = expressionBuilder.GetIncludePropertyExpressions(includeProperties);
+
+            var entities = await currentEntityRepository.GetAllAsync(filterEpression, orderByExpression, skip, take, IncludePropertiesExpression);
             if (entities == null)
             {
                 return result;
@@ -108,12 +112,18 @@ namespace BLL.Services.Common
 
         public Task<TEntityDTO> GetByIdAsync(TKey id, params Expression<Func<TEntityDTO, object>>[] includedProperties)
         {
-            throw new NotImplementedException();
+            var entity = await currentEntityRepository.GetSingleByIdAsync(id);
+            if (entity == null)
+            {
+                return default(TEntityDTO);
+            }
+            var result = mapper.Map<TEntity, TEntityDTO>(entity);
+            return result;
         }
 
         public Task SaveChangesAsync()
         {
-            return currentEntityRepository.SaveChangesAsync();
+            return currentEntityRepository.CommitAsync();
         }
 
         public void Update(TEntityDTO dto, params Expression<Func<TEntityDTO, object>>[] includedProperties)

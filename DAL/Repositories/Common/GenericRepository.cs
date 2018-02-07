@@ -25,31 +25,32 @@ namespace Journal.DAL.Repositories.Common
             dbSet = db.Set<TEntity>();
         }
 
-        public virtual IEnumerable<TEntity> GetAll(
-            Expression<Func<TEntity,
-            bool>> filter = null,
-            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
-            int? skip = null, int? take = null,
-            params Expression<Func<TEntity, object>>[] includeProperties)
+
+        public virtual IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>> filter = null,
+                                                   Expression<Func<TEntity, object>> orderBy = null,
+                                                   bool orderDesc = false,
+                                                   int? skip = null,
+                                                   int? take = null,
+                                                   params Expression<Func<TEntity, object>>[] includeProperties)
         {
             IQueryable<TEntity> query = dbSet;
-            GetQueryable(filter, orderBy, skip, take);
+            GetQueryable(filter, orderBy, orderDesc, skip, take);
             return query.ToList();
         }
 
-        public virtual async Task<IEnumerable<TEntity>> GetAllAsync(
-            Expression<Func<TEntity, bool>> filter = null,
-            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
-            int? skip = null,
-            int? take = null,
-            params Expression<Func<TEntity, object>>[] includeProperties)
+        public virtual async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> filter = null,
+                                                                    Expression<Func<TEntity, object>> orderBy = null,
+                                                                    bool orderDesc = false,
+                                                                    int? skip = null,
+                                                                    int? take = null,
+                                                                    params Expression<Func<TEntity, object>>[] includeProperties)
         {
             IQueryable<TEntity> query = dbSet;
-            GetQueryable(filter,orderBy,skip,take);
+            GetQueryable(filter,orderBy,orderDesc,skip,take);
             return await query.ToListAsync();
         }
      
-        public virtual void Insert(TEntity entity)
+        public virtual void InsertOnCommit(TEntity entity)
         {
             if(entity == null)
             {
@@ -58,7 +59,7 @@ namespace Journal.DAL.Repositories.Common
             dbSet.Add(entity);
         }
 
-        public virtual void Update(TEntity entity, params Expression<Func<TEntity, object>>[] updateProperties)
+        public virtual void UpdateOnCommit(TEntity entity, params Expression<Func<TEntity, object>>[] updateProperties)
         {
             if (entity == null)
             {
@@ -74,7 +75,7 @@ namespace Journal.DAL.Repositories.Common
                 db.Entry(entity).Property(property).IsModified = true;
             }
         }
-        public virtual void Delete(TEntity entity)
+        public virtual void DeleteOnCommit(TEntity entity)
         {
             if (entity == null)
             {
@@ -87,30 +88,59 @@ namespace Journal.DAL.Repositories.Common
             }
             dbSet.Remove(entity);
         }
-        public virtual async Task Delete(TKey id)
+        public virtual async Task DeleteOnCommit(TKey id)
         {
             TEntity entity = await dbSet.FindAsync(id);
             if(entity != null)
             {
-                Delete(entity);
+                DeleteOnCommit(entity);
             }
         }
        
-        public virtual void SaveChanges()
+        public virtual void Commit()
         {
             db.SaveChanges();
         }
-        public virtual Task SaveChangesAsync()
+        public virtual Task CommitAsync()
         {
             return db.SaveChangesAsync();
         }
 
+        public virtual TEntity GetFirstOrDefault(Expression<Func<TEntity, bool>> filter = null, params Expression<Func<TEntity, object>>[] includeProperties)
+        {
+            IQueryable<TEntity> query = dbSet;
+
+            if(includeProperties != null)
+            {
+                foreach (Expression<Func<TEntity, object>> include in includeProperties)
+                {
+                    query = query.Include(include);
+                }
+            }           
+            return query.FirstOrDefault(filter);
+        }
+
+        public virtual Task<TEntity> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> filter = null, params Expression<Func<TEntity, object>>[] includeProperties)
+        {
+            IQueryable<TEntity> query = dbSet;
+
+            if (includeProperties != null)
+            {
+                foreach (Expression<Func<TEntity, object>> include in includeProperties)
+                {
+                    query = query.Include(include);
+                }
+            }
+            return query.FirstOrDefaultAsync(filter);
+        }
+
         protected internal virtual IQueryable<TEntity> GetQueryable(
-            Expression<Func<TEntity,
-            bool>> filter = null,
-            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
-            int? skip = null, int? take = null,
-            params Expression<Func<TEntity, object>>[] includeProperties)
+         Expression<Func<TEntity, bool>> filter = null,
+         Expression<Func<TEntity, object>> orderBy = null,
+         bool orderDesc = false,
+         int? skip = null,
+         int? take = null,
+         params Expression<Func<TEntity, object>>[] includeProperties)
         {
             IQueryable<TEntity> query = dbSet;
 
@@ -126,7 +156,11 @@ namespace Journal.DAL.Repositories.Common
 
             if (orderBy != null)
             {
-                query = orderBy(query);
+                if (orderDesc)
+                {
+                    query = query.OrderByDescending(orderBy);
+                }
+                query = query.OrderBy(orderBy);
             }
 
             if (skip.HasValue)
@@ -142,43 +176,10 @@ namespace Journal.DAL.Repositories.Common
             return query;
         }
 
-        public virtual TEntity GetFirstOrDefault(Expression<Func<TEntity, bool>> filter = null, params Expression<Func<TEntity, object>>[] includeProperties)
-        {
-            IQueryable<TEntity> query = dbSet;
-
-            if(includeProperties != null)
-            {
-                foreach (Expression<Func<TEntity, object>> include in includeProperties)
-                    query = query.Include(include);
-            }           
-            return query.FirstOrDefault(filter);
-        }
-
-        public virtual Task<TEntity> GetFirstOrDefaultAsync(Expression<Func<TEntity, bool>> filter = null, params Expression<Func<TEntity, object>>[] includeProperties)
-        {
-            IQueryable<TEntity> query = dbSet;
-
-            if (includeProperties != null)
-            {
-                foreach (Expression<Func<TEntity, object>> include in includeProperties)
-                    query = query.Include(include);
-            }
-            return query.FirstOrDefaultAsync(filter);
-        }
-
         public virtual void Dispose()
         {
             db.Dispose();
         }
 
-        public TEntity GetSingleBy(TKey id)
-        {
-            return dbSet.Find(id);
-        }
-
-        public Task<TEntity> GetSingleByIdAsync(TKey id)
-        {
-            return dbSet.FindAsync(id);
-        }
     }
 }

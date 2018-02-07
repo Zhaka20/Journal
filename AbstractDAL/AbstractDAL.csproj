@@ -40,7 +40,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbstractRepositories\Common\IAsyncCommitable.cs" />
+    <Compile Include="AbstractRepositories\Common\IAsyncGenericRepository.cs" />
+    <Compile Include="AbstractRepositories\Common\ICommitable.cs" />
+    <Compile Include="AbstractRepositories\Common\IEntityAsyncReader.cs" />
+    <Compile Include="AbstractRepositories\Common\IEntityCreator.cs" />
+    <Compile Include="AbstractRepositories\Common\IEntityRemover.cs" />
+    <Compile Include="AbstractRepositories\Common\IEntityUpdater.cs" />
+    <Compile Include="AbstractRepositories\Common\ISyncEntityReader.cs" />
+    <Compile Include="AbstractRepositories\Common\IGenericAsyncRepository.cs" />
     <Compile Include="AbstractRepositories\Common\IGenericRepository.cs" />
+    <Compile Include="AbstractRepositories\Common\IGenericSyncRepository.cs" />
     <Compile Include="AbstractRepositories\IAssignmentFileRepository.cs" />
     <Compile Include="AbstractRepositories\IAssignmentRepository.cs" />
     <Compile Include="AbstractRepositories\IAttendanceRepository.cs" />
